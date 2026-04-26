@@ -105,8 +105,38 @@ apiRouter.get('/admin/ip-status/:ip', adminSessionAuth, (req, res) => {
   res.json({ ip, banned });
 });
 
-// Admin: Get server stats
-apiRouter.get('/admin/stats', adminSessionAuth, (req, res) => {
+// Admin: Get connected users and their IPs
+apiRouter.get('/admin/users', adminSessionAuth, (req, res) => {
+  const connectedUsers = [];
+  const rooms = global.rooms || new Map();
+  
+  // Lấy thông tin từ tất cả rooms
+  rooms.forEach((room, roomId) => {
+    if (room.users) {
+      room.users.forEach(user => {
+        connectedUsers.push({
+          roomId,
+          username: user.username,
+          ip: user.ip,
+          joinedAt: user.joinedAt,
+          lastActive: user.lastActive
+        });
+      });
+    }
+  });
+
+  res.json({
+    connectedUsers,
+    totalUsers: connectedUsers.length,
+    uniqueIPs: [...new Set(connectedUsers.map(u => u.ip))].length
+  });
+});
+
+// Admin: Get IP activity history
+apiRouter.get('/admin/ip-history', adminSessionAuth, (req, res) => {
+  const ipHistory = global.ipHistory || [];
+  res.json({ ipHistory });
+});
   const stats = getStats();
   res.json({
     ...stats,

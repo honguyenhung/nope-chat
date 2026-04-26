@@ -8,11 +8,18 @@ export default function AdminDashboard({ token, onLogout }) {
   const [unbanIP, setUnbanIP] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [connectedUsers, setConnectedUsers] = useState([]);
+  const [ipHistory, setIpHistory] = useState([]);
 
   // Fetch stats every 5 seconds
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
+    fetchUsers();
+    fetchIpHistory();
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchUsers();
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -31,8 +38,39 @@ export default function AdminDashboard({ token, onLogout }) {
     }
   }
 
-  async function handleBanIP() {
-    if (!banIP.trim()) return;
+  async function fetchUsers() {
+    try {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
+      const response = await fetch(`${backendUrl}/api/admin/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setConnectedUsers(data.connectedUsers || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  }
+
+  async function fetchIpHistory() {
+    try {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
+      const response = await fetch(`${backendUrl}/api/admin/ip-history`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIpHistory(data.ipHistory || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch IP history:', err);
+    }
+  }
+
+  async function handleBanIP(ipToBan = null) {
+    const targetIP = ipToBan || banIP.trim();
+    if (!targetIP) return;
     setLoading(true);
     try {
       const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
@@ -42,7 +80,7 @@ export default function AdminDashboard({ token, onLogout }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ip: banIP.trim() })
+        body: JSON.stringify({ ip: targetIP })
       });
       const data = await response.json();
       setMessage(data.message || 'IP banned successfully');
@@ -219,7 +257,7 @@ export default function AdminDashboard({ token, onLogout }) {
                     className="field flex-1"
                   />
                   <button
-                    onClick={handleBanIP}
+                    onClick={() => handleBanIP()}
                     disabled={loading || !banIP.trim()}
                     className="btn btn-grad px-4"
                   >
@@ -259,14 +297,68 @@ export default function AdminDashboard({ token, onLogout }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="glass p-6"
+              className="space-y-6"
             >
-              <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-1)' }}>
-                👥 User Management
-              </h3>
-              <p className="text-sm" style={{ color: 'var(--text-3)' }}>
-                User management features coming soon...
-              </p>
+              {/* Connected Users */}
+              <div className="glass p-6">
+                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-1)' }}>
+                  👥 Connected Users ({connectedUsers.length})
+                </h3>
+                <div className="space-y-2 max-h-96 overflow-y-auto">
+                  {connectedUsers.length === 0 ? (
+                    <p className="text-sm text-center py-4" style={{ color: 'var(--text-3)' }}>
+                      No users currently connected
+                    </p>
+                  ) : (
+                    connectedUsers.map((user, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 rounded-xl"
+                        style={{ background: 'var(--input-bg)', border: '1px solid var(--border)' }}>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium" style={{ color: 'var(--text-1)' }}>
+                              {user.username}
+                            </span>
+                            <span className="text-xs px-2 py-1 rounded-lg"
+                              style={{ background: 'var(--accent)', color: '#fff' }}>
+                              {user.roomId === 'global' ? 'Global' : 'Private'}
+                            </span>
+                          </div>
+                          <div className="text-xs mt-1" style={{ color: 'var(--text-3)' }}>
+                            IP: {user.ip} • Joined: {new Date(user.joinedAt).toLocaleTimeString()}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleBanIP(user.ip)}
+                          className="btn btn-soft px-3 py-1 text-xs"
+                          style={{ background: 'rgba(237,66,69,0.1)', color: '#ed4245' }}
+                        >
+                          🔨 Ban IP
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* IP History */}
+              <div className="glass p-6">
+                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--text-1)' }}>
+                  📋 Recent IP Activity
+                </h3>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {ipHistory.slice(0, 50).map((entry, index) => (
+                    <div key={index} className="flex items-center justify-between text-xs py-2 px-3 rounded-lg"
+                      style={{ background: 'var(--input-bg)' }}>
+                      <span style={{ color: 'var(--text-2)' }}>
+                        {entry.ip}
+                      </span>
+                      <span style={{ color: 'var(--text-3)' }}>
+                        {entry.action} • {new Date(entry.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
 

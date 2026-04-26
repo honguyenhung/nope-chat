@@ -17,8 +17,25 @@ import {
 import { containsProfanity } from '../utils/profanityFilter.js';
 
 export function registerSocketHandlers(io) {
+  // Initialize global IP tracking
+  if (!global.ipHistory) global.ipHistory = [];
+  if (!global.rooms) global.rooms = new Map();
+
   io.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
+
+    // Track IP activity
+    global.ipHistory.unshift({
+      ip,
+      action: 'connect',
+      timestamp: Date.now(),
+      socketId: socket.id
+    });
+    
+    // Keep only last 1000 entries
+    if (global.ipHistory.length > 1000) {
+      global.ipHistory = global.ipHistory.slice(0, 1000);
+    }
 
     // Check if IP is banned
     if (isIPBanned(ip)) {
@@ -103,6 +120,9 @@ export function registerSocketHandlers(io) {
         username,
         publicKey,
         socketId: socket.id,
+        ip: ip, // Track IP for admin
+        joinedAt: Date.now(),
+        lastActive: Date.now()
       });
 
       socket.join(targetRoom);
