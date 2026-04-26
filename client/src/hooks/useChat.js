@@ -65,7 +65,18 @@ export function useChat(roomId, password = null) {
 
     // Handle admin messages (unencrypted)
     socket.on('admin_message', (adminMsg) => {
+      console.log('Received admin message:', adminMsg);
       setMessages((prev) => {
+        // Check for duplicates by ID and timestamp
+        const exists = prev.find(msg => 
+          msg.id === adminMsg.id || 
+          (msg.isAdmin && msg.timestamp === adminMsg.timestamp && msg.text === adminMsg.text)
+        );
+        if (exists) {
+          console.log('Duplicate admin message detected, skipping');
+          return prev; // Don't add duplicate
+        }
+        
         const next = [...prev, {
           ...adminMsg,
           isAdmin: true,
@@ -124,7 +135,7 @@ export function useChat(roomId, password = null) {
     });
 
     return () => {
-      ['message_history','new_message','room_users','user_joined',
+      ['message_history','new_message','admin_message','room_messages_cleared','room_users','user_joined',
        'user_left','user_typing','user_stop_typing','join_error'].forEach((e) => socket.off(e));
       Object.values(typingTimers.current).forEach(clearTimeout);
       typingTimers.current = {};

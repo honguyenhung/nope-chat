@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', rateLimiter, apiRouter);
-app.use('/api/admin', adminRouter);
+app.use('/api/admin', adminRouter); // Admin routes without rate limiting
 
 // --- Socket handlers ---
 registerSocketHandlers(io);

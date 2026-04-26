@@ -282,7 +282,7 @@ adminRouter.post('/send-message', adminAuth, (req, res) => {
   
   if (global.io) {
     const adminMessage = {
-      id: Date.now().toString(),
+      id: `admin-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID
       username: '👑 Admin',
       text: message.trim(),
       timestamp: Date.now(),
@@ -292,13 +292,8 @@ adminRouter.post('/send-message', adminAuth, (req, res) => {
     // Log for debugging
     console.log(`Admin sending message to room: ${roomId}`, adminMessage);
     
-    // Send to specific room
+    // ONLY send via socket - don't store in room history to avoid duplicates
     global.io.to(roomId).emit('admin_message', adminMessage);
-    
-    // Also store in room messages for history
-    if (!global.roomMessages) global.roomMessages = {};
-    if (!global.roomMessages[roomId]) global.roomMessages[roomId] = [];
-    global.roomMessages[roomId].push(adminMessage);
     
     res.json({ 
       success: true, 

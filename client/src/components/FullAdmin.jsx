@@ -152,17 +152,21 @@ export default function FullAdmin() {
       fetchAllData();
       const interval = setInterval(fetchAllData, 5000);
       
-      // Auto-refresh session every hour
+      // Auto-refresh session every 30 minutes instead of 1 hour
       const sessionRefresh = setInterval(async () => {
         try {
-          await fetch(`${API_BASE}/refresh`, {
+          const response = await fetch(`${API_BASE}/refresh`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
           });
+          if (!response.ok) {
+            // Session expired, logout
+            handleLogout();
+          }
         } catch (err) {
           console.error('Session refresh failed:', err);
         }
-      }, 60 * 60 * 1000); // 1 hour
+      }, 30 * 60 * 1000); // 30 minutes
       
       return () => {
         clearInterval(interval);
@@ -294,10 +298,10 @@ export default function FullAdmin() {
       
       const data = await response.json();
       if (response.ok) {
-        setMessage(`✅ ${data.message || 'Admin message sent successfully'}`);
+        setMessage(`✅ Message sent to ${selectedRoom === 'global' ? 'Global Room' : 'room ' + selectedRoom.slice(0, 8) + '...'}`);
         setAdminMessage('');
-        // Refresh room messages to show the new admin message
-        setTimeout(() => fetchRoomMessages(selectedRoom), 1000);
+        // Don't refresh room messages to avoid duplicates
+        // The message will appear via socket event
       } else {
         setMessage(`❌ Failed to send message: ${data.error || 'Unknown error'}`);
       }
