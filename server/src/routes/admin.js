@@ -207,15 +207,25 @@ adminRouter.delete('/messages/:roomId/:messageId', adminAuth, (req, res) => {
 adminRouter.delete('/messages/:roomId', adminAuth, (req, res) => {
   const { roomId } = req.params;
   
+  // Only clear messages, don't delete the room itself
   if (!global.roomMessages) global.roomMessages = {};
   global.roomMessages[roomId] = [];
   
-  // Broadcast room clear to all users in room
+  // Broadcast message clear to all users in room (but keep room alive)
   if (global.io) {
-    global.io.to(roomId).emit('room_cleared', { clearedBy: 'admin' });
+    global.io.to(roomId).emit('room_messages_cleared', { 
+      clearedBy: 'admin',
+      message: '🧹 Admin cleared all messages in this room'
+    });
   }
   
-  res.json({ success: true, message: `All messages cleared from ${roomId}` });
+  console.log(`Admin cleared messages in room: ${roomId}`);
+  
+  res.json({ 
+    success: true, 
+    message: `Messages cleared from ${roomId === 'global' ? 'Global Room' : 'room ' + roomId}`,
+    roomId 
+  });
 });
 
 // Kick user from room

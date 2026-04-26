@@ -69,10 +69,25 @@ export function useChat(roomId, password = null) {
         const next = [...prev, {
           ...adminMsg,
           isAdmin: true,
-          decrypted: adminMsg.message // Admin messages are plain text
+          decrypted: adminMsg.text || adminMsg.message // Admin messages are plain text
         }];
         return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
       });
+    });
+
+    // Handle room messages cleared (not room deletion)
+    socket.on('room_messages_cleared', (data) => {
+      setMessages([]); // Clear messages in UI
+      // Show admin notification
+      const clearNotification = {
+        id: Date.now().toString(),
+        username: '🧹 System',
+        text: data.message || 'Messages cleared by admin',
+        timestamp: Date.now(),
+        isAdmin: true,
+        decrypted: data.message || 'Messages cleared by admin'
+      };
+      setMessages([clearNotification]);
     });
 
     socket.on('room_users', ({ users }) => setUsers(users));

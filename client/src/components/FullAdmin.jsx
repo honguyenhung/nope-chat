@@ -250,8 +250,10 @@ export default function FullAdmin() {
   }
 
   async function handleClearRoom(roomId) {
-    if (!confirm(`Clear all messages from room "${roomId}"?`)) return;
+    const roomName = roomId === 'global' ? 'Global Room' : `Room ${roomId.slice(0, 8)}...`;
+    if (!confirm(`Clear all messages from ${roomName}?\n\nThis will delete all messages but keep the room active.`)) return;
     
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/messages/${roomId}`, {
         method: 'DELETE',
@@ -259,10 +261,17 @@ export default function FullAdmin() {
       });
       
       const data = await response.json();
-      setMessage(data.message || 'Room cleared');
-      fetchRoomMessages(roomId);
+      if (response.ok) {
+        setMessage(`✅ ${data.message || 'Messages cleared successfully'}`);
+        fetchRoomMessages(roomId); // Refresh to show empty room
+        fetchAllData(); // Refresh room list
+      } else {
+        setMessage(`❌ Failed to clear messages: ${data.error || 'Unknown error'}`);
+      }
     } catch (err) {
-      setMessage('Failed to clear room');
+      setMessage('❌ Failed to clear messages: Connection error');
+    } finally {
+      setLoading(false);
     }
   }
 
