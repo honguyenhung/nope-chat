@@ -3,18 +3,69 @@ import { roomExists } from '../utils/roomStore.js';
 import { manualBanIP, manualUnbanIP, isIPBanned } from '../middleware/ipLimiter.js';
 import { getStats } from '../utils/monitor.js';
 import { rateLimiter } from '../middleware/rateLimiter.js';
+import crypto from 'crypto';
 
 export const apiRouter = Router();
 
-// Simple admin auth middleware (use proper auth in production)
-const adminAuth = (req, res, next) => {
-  const adminKey = process.env.ADMIN_KEY;
-  if (!adminKey) {
-    return res.status(501).json({ error: 'Admin functionality not configured' });
+// Admin credentials (sẽ lấy từ environment variables)
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Nhie';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Hungnguyen@1515';
+
+// Admin login endpoint
+apiRouter.post('/admin/login', rateLimiter, (req, res) => {
+  const { username, password } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Username and password required' 
+    });
   }
-  if (req.headers.authorization !== `Bearer ${adminKey}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
+
+  // Kiểm tra credentials
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    // Tạo session token (đơn giản)
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // Lưu token tạm thời (trong production nên dùng Redis)
+    global.adminSessions = global.adminSessions || new Map();
+    global.adminSessions.set(token, {
+      username,
+      loginTime: Date.now(),
+      expires: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+    });
+
+    res.json({
+      success: true,
+      token,
+      message: 'Login successful',
+      user: { username }
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Invalid username or password'
+    });
   }
+});
+
+// Admin auth middleware với session token
+const adminSessionAuth = (req, res, next) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const sessions = global.adminSessions || new Map();
+  const session = sessions.get(token);
+
+  if (!session || session.expires < Date.now()) {
+    if (session) sessions.delete(token); // Cleanup expired
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+
+  req.adminUser = session.username;
   next();
 };
 
@@ -30,37 +81,38 @@ apiRouter.get('/health', rateLimiter, (req, res) => {
 });
 
 // Admin: Ban IP
-apiRouter.post('/admin/ban-ip', adminAuth, (req, res) => {
+apiRouter.post('/admin/ban-ip', adminSessionAuth, (req, res) => {
   const { ip } = req.body;
   if (!ip) return res.status(400).json({ error: 'IP required' });
   
   manualBanIP(ip);
-  res.json({ success: true, message: `IP ${ip} banned` });
+  res.json({ success: true, message: `IP ${ip} banned by ${req.adminUser}` });
 });
 
 // Admin: Unban IP
-apiRouter.post('/admin/unban-ip', adminAuth, (req, res) => {
+apiRouter.post('/admin/unban-ip', adminSessionAuth, (req, res) => {
   const { ip } = req.body;
   if (!ip) return res.status(400).json({ error: 'IP required' });
   
   manualUnbanIP(ip);
-  res.json({ success: true, message: `IP ${ip} unbanned` });
+  res.json({ success: true, message: `IP ${ip} unbanned by ${req.adminUser}` });
 });
 
 // Admin: Check IP status
-apiRouter.get('/admin/ip-status/:ip', adminAuth, (req, res) => {
+apiRouter.get('/admin/ip-status/:ip', adminSessionAuth, (req, res) => {
   const { ip } = req.params;
   const banned = isIPBanned(ip);
   res.json({ ip, banned });
 });
 
 // Admin: Get server stats
-apiRouter.get('/admin/stats', adminAuth, (req, res) => {
+apiRouter.get('/admin/stats', adminSessionAuth, (req, res) => {
   const stats = getStats();
   res.json({
     ...stats,
     serverUptime: process.uptime(),
     memoryUsage: process.memoryUsage(),
     timestamp: Date.now(),
+    adminUser: req.adminUser
   });
 });

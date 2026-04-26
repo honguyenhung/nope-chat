@@ -286,6 +286,20 @@ export default function LandingPage() {
             </div>
           ))}
         </motion.div>
+
+        {/* ── Admin Access ── */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+          className="text-center"
+        >
+          <button
+            onClick={() => navigate('/admin')}
+            className="text-[10px] font-mono opacity-30 hover:opacity-60 transition-opacity"
+            style={{ color: 'var(--text-3)' }}
+          >
+            👑 admin
+          </button>
+        </motion.div>
       </div>
     </div>
   );
