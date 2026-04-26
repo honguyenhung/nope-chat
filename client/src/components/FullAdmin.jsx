@@ -269,6 +269,7 @@ export default function FullAdmin() {
   async function handleSendAdminMessage() {
     if (!adminMessage.trim() || !selectedRoom) return;
     
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/send-message`, {
         method: 'POST',
@@ -283,10 +284,19 @@ export default function FullAdmin() {
       });
       
       const data = await response.json();
-      setMessage(data.message || 'Admin message sent');
-      setAdminMessage('');
+      if (response.ok) {
+        setMessage(`✅ ${data.message || 'Admin message sent successfully'}`);
+        setAdminMessage('');
+        // Refresh room messages to show the new admin message
+        setTimeout(() => fetchRoomMessages(selectedRoom), 1000);
+      } else {
+        setMessage(`❌ Failed to send message: ${data.error || 'Unknown error'}`);
+      }
     } catch (err) {
-      setMessage('Failed to send message');
+      setMessage('❌ Failed to send message: Connection error');
+      console.error('Send message error:', err);
+    } finally {
+      setLoading(false);
     }
   }
 

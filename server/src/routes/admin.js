@@ -274,15 +274,30 @@ adminRouter.post('/send-message', adminAuth, (req, res) => {
     const adminMessage = {
       id: Date.now().toString(),
       username: '👑 Admin',
-      text: message.trim(), // Use 'text' instead of 'message'
+      text: message.trim(),
       timestamp: Date.now(),
       isAdmin: true
     };
     
+    // Log for debugging
+    console.log(`Admin sending message to room: ${roomId}`, adminMessage);
+    
+    // Send to specific room
     global.io.to(roomId).emit('admin_message', adminMessage);
-    res.json({ success: true, message: 'Admin message sent' });
+    
+    // Also store in room messages for history
+    if (!global.roomMessages) global.roomMessages = {};
+    if (!global.roomMessages[roomId]) global.roomMessages[roomId] = [];
+    global.roomMessages[roomId].push(adminMessage);
+    
+    res.json({ 
+      success: true, 
+      message: `Admin message sent to room ${roomId}`,
+      roomId,
+      messageText: message.trim()
+    });
   } else {
-    res.status(500).json({ error: 'Server not available' });
+    res.status(500).json({ error: 'Socket.io server not available' });
   }
 });
 

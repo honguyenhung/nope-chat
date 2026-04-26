@@ -81,6 +81,9 @@ app.use('/api/admin', adminRouter);
 // --- Socket handlers ---
 registerSocketHandlers(io);
 
+// Make io globally available for admin routes
+global.io = io;
+
 const PORT = process.env.PORT || 3001;
 const server = httpServer.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
