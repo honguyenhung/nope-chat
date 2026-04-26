@@ -9,7 +9,7 @@ export const apiRouter = Router();
 
 // Admin credentials (sẽ lấy từ environment variables)
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Nhie';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Hungnguyen@1515';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1';
 
 // Admin login endpoint
 apiRouter.post('/admin/login', rateLimiter, (req, res) => {
