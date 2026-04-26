@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { rateLimiter } from './middleware/rateLimiter.js';
 import { registerSocketHandlers } from './sockets/index.js';
 import { apiRouter } from './routes/api.js';
+import { adminRouter } from './routes/admin.js';
 
 const isProd = process.env.NODE_ENV === 'production';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
@@ -69,6 +70,7 @@ app.use(helmet({
 app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json({ limit: '10kb' }));
 app.use('/api', rateLimiter, apiRouter);
+app.use('/api/admin', adminRouter);
 
 // --- Socket handlers ---
 registerSocketHandlers(io);

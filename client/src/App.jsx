@@ -5,6 +5,7 @@ import { CryptoProvider } from './hooks/useCrypto.jsx';
 import { useTheme } from './hooks/useTheme.js';
 import LandingPage from './components/LandingPage.jsx';
 import ChatPage from './components/ChatPage.jsx';
+import SimpleAdmin from './components/SimpleAdmin.jsx';
 
 export const ThemeContext = createContext({ theme: 'dark', toggle: () => {} });
 export const useThemeContext = () => useContext(ThemeContext);
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/"            element={<LandingPage />} />
             <Route path="/room/:roomId" element={<ChatPage />} />
             <Route path="/global"       element={<ChatPage />} />
+            <Route path="/admin"        element={<SimpleAdmin />} />
           </Routes>
         </SocketProvider>
       </CryptoProvider>
