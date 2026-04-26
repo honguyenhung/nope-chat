@@ -69,6 +69,12 @@ app.use(helmet({
 }));
 app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json({ limit: '10kb' }));
+
+// Root route - redirect to frontend
+app.get('/', (req, res) => {
+  res.redirect(CLIENT_URL);
+});
+
 app.use('/api', rateLimiter, apiRouter);
 app.use('/api/admin', adminRouter);
 
