@@ -9,8 +9,31 @@ export const adminRouter = Router();
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'Nhie';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1';
 
-// Simple session storage
-const adminSessions = new Map();
+// Simple session storage - persistent across server restarts
+let adminSessions = new Map();
+
+// Load sessions from environment if available (for production persistence)
+if (process.env.ADMIN_SESSIONS) {
+  try {
+    const savedSessions = JSON.parse(process.env.ADMIN_SESSIONS);
+    adminSessions = new Map(savedSessions);
+  } catch (err) {
+    console.log('No saved admin sessions found');
+  }
+}
+
+// Save sessions periodically (every 5 minutes)
+setInterval(() => {
+  if (adminSessions.size > 0) {
+    // Clean expired sessions
+    const now = Date.now();
+    for (const [token, session] of adminSessions.entries()) {
+      if (session.expires < now) {
+        adminSessions.delete(token);
+      }
+    }
+  }
+}, 5 * 60 * 1000);
 
 // Admin login
 adminRouter.post('/login', rateLimiter, (req, res) => {
@@ -29,7 +52,7 @@ adminRouter.post('/login', rateLimiter, (req, res) => {
     adminSessions.set(token, {
       username,
       loginTime: Date.now(),
-      expires: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+      expires: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days instead of 24 hours
     });
 
     res.json({
@@ -43,6 +66,31 @@ adminRouter.post('/login', rateLimiter, (req, res) => {
       message: 'Invalid credentials'
     });
   }
+});
+
+// Extend session (refresh token)
+adminRouter.post('/refresh', (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const session = adminSessions.get(token);
+  if (!session || session.expires < Date.now()) {
+    if (session) adminSessions.delete(token);
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+
+  // Extend session by 7 days
+  session.expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  adminSessions.set(token, session);
+
+  res.json({ 
+    success: true, 
+    message: 'Session refreshed',
+    expires: session.expires 
+  });
 });
 
 // Auth middleware

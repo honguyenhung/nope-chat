@@ -5,7 +5,7 @@ export default function FullAdmin() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState(localStorage.getItem('admin_token') || '');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -26,6 +26,39 @@ export default function FullAdmin() {
 
   const API_BASE = 'https://nope-chat.onrender.com/api/admin';
 
+  // Check if already logged in on component mount
+  useEffect(() => {
+    const savedToken = localStorage.getItem('admin_token');
+    if (savedToken) {
+      setToken(savedToken);
+      // Verify token is still valid
+      verifyToken(savedToken);
+    }
+  }, []);
+
+  async function verifyToken(authToken) {
+    try {
+      const response = await fetch(`${API_BASE}/stats`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      
+      if (response.ok) {
+        setIsLoggedIn(true);
+        fetchAllData(authToken);
+      } else {
+        // Token invalid, clear it
+        localStorage.removeItem('admin_token');
+        setToken('');
+        setIsLoggedIn(false);
+      }
+    } catch (err) {
+      console.error('Token verification failed:', err);
+      localStorage.removeItem('admin_token');
+      setToken('');
+      setIsLoggedIn(false);
+    }
+  }
+
   async function handleLogin(e) {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
@@ -41,6 +74,7 @@ export default function FullAdmin() {
       const data = await response.json();
       if (response.ok && data.success) {
         setToken(data.token);
+        localStorage.setItem('admin_token', data.token); // Save to localStorage
         setIsLoggedIn(true);
         setMessage('Login successful!');
         fetchAllData(data.token);
@@ -109,7 +143,23 @@ export default function FullAdmin() {
     if (isLoggedIn && token) {
       fetchAllData();
       const interval = setInterval(fetchAllData, 5000);
-      return () => clearInterval(interval);
+      
+      // Auto-refresh session every hour
+      const sessionRefresh = setInterval(async () => {
+        try {
+          await fetch(`${API_BASE}/refresh`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch (err) {
+          console.error('Session refresh failed:', err);
+        }
+      }, 60 * 60 * 1000); // 1 hour
+      
+      return () => {
+        clearInterval(interval);
+        clearInterval(sessionRefresh);
+      };
     }
   }, [isLoggedIn, token]);
 
@@ -233,6 +283,7 @@ export default function FullAdmin() {
   }
 
   function handleLogout() {
+    localStorage.removeItem('admin_token'); // Clear localStorage
     setIsLoggedIn(false);
     setToken('');
     setUsername('');
