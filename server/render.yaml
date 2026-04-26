@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: anon-chat-server
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_URL
+        sync: false   # Set this in Render dashboard to your Vercel URL
+      - key: PORT
+        value: 3001
+      - key: ADMIN_KEY
+        sync: false   # Set this in Render dashboard (generate a secure key)
+      - key: MAX_CONNECTIONS_PER_IP
+        value: 5
+      - key: MAX_VIOLATIONS_BEFORE_BAN
+        value: 10
+      - key: BAN_DURATION_MINUTES
+        value: 60

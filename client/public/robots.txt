@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /global
+Disallow: /room/
+Disallow: /api/
+
+Sitemap: https://anonchat.example.com/sitemap.xml
+Allow: /
