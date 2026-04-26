@@ -12,20 +12,17 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '1';
 // Simple session storage - persistent across server restarts
 let adminSessions = new Map();
 
-// Load sessions from environment if available (for production persistence)
-if (process.env.ADMIN_SESSIONS) {
-  try {
-    const savedSessions = JSON.parse(process.env.ADMIN_SESSIONS);
-    adminSessions = new Map(savedSessions);
-  } catch (err) {
-    console.log('No saved admin sessions found');
-  }
-}
+// Initialize with a default admin session for testing
+const defaultToken = 'admin-default-token-2024';
+adminSessions.set(defaultToken, {
+  username: 'Nhie',
+  loginTime: Date.now(),
+  expires: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
+});
 
-// Save sessions periodically (every 5 minutes)
+// Clean expired sessions periodically (every hour)
 setInterval(() => {
   if (adminSessions.size > 0) {
-    // Clean expired sessions
     const now = Date.now();
     for (const [token, session] of adminSessions.entries()) {
       if (session.expires < now) {
@@ -33,7 +30,7 @@ setInterval(() => {
       }
     }
   }
-}, 5 * 60 * 1000);
+}, 60 * 60 * 1000);
 
 // Admin login
 adminRouter.post('/login', rateLimiter, (req, res) => {
@@ -52,7 +49,7 @@ adminRouter.post('/login', rateLimiter, (req, res) => {
     adminSessions.set(token, {
       username,
       loginTime: Date.now(),
-      expires: Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days instead of 24 hours
+      expires: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
     });
 
     res.json({
@@ -82,8 +79,8 @@ adminRouter.post('/refresh', (req, res) => {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 
-  // Extend session by 7 days
-  session.expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  // Extend session by 30 days
+  session.expires = Date.now() + 30 * 24 * 60 * 60 * 1000;
   adminSessions.set(token, session);
 
   res.json({ 

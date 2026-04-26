@@ -44,18 +44,21 @@ export default function FullAdmin() {
       
       if (response.ok) {
         setIsLoggedIn(true);
+        setMessage(''); // Clear any error messages
         fetchAllData(authToken);
       } else {
         // Token invalid, clear it
         localStorage.removeItem('admin_token');
         setToken('');
         setIsLoggedIn(false);
+        setMessage('Session expired, please login again');
       }
     } catch (err) {
       console.error('Token verification failed:', err);
-      localStorage.removeItem('admin_token');
-      setToken('');
-      setIsLoggedIn(false);
+      // Don't clear token on network error, might be temporary
+      setMessage('Connection error, retrying...');
+      // Retry after 3 seconds
+      setTimeout(() => verifyToken(authToken), 3000);
     }
   }
 
@@ -64,6 +67,8 @@ export default function FullAdmin() {
     if (!username.trim() || !password.trim()) return;
 
     setLoading(true);
+    setMessage(''); // Clear previous messages
+    
     try {
       const response = await fetch(`${API_BASE}/login`, {
         method: 'POST',
@@ -79,10 +84,13 @@ export default function FullAdmin() {
         setMessage('Login successful!');
         fetchAllData(data.token);
       } else {
-        setMessage(data.message || 'Login failed');
+        setMessage(data.message || 'Invalid credentials');
+        // Clear password field on failed login
+        setPassword('');
       }
     } catch (err) {
-      setMessage('Connection failed');
+      setMessage('Connection failed - check if server is running');
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
