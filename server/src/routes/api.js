@@ -1,8 +1,7 @@
 import { Router } from 'express';
-import { roomExists } from '../utils/roomStore.js';
+import { rateLimiter } from '../middleware/rateLimiter.js';
 import { manualBanIP, manualUnbanIP, isIPBanned } from '../middleware/ipLimiter.js';
 import { getStats } from '../utils/monitor.js';
-import { rateLimiter } from '../middleware/rateLimiter.js';
 import crypto from 'crypto';
 
 export const apiRouter = Router();
@@ -109,35 +108,18 @@ apiRouter.get('/admin/ip-status/:ip', adminSessionAuth, (req, res) => {
 
 // Admin: Get connected users and their IPs
 apiRouter.get('/admin/users', adminSessionAuth, (req, res) => {
-  const connectedUsers = [];
-  const rooms = global.rooms || new Map();
-  
-  // Lấy thông tin từ tất cả rooms
-  rooms.forEach((room, roomId) => {
-    if (room.users) {
-      room.users.forEach(user => {
-        connectedUsers.push({
-          roomId,
-          username: user.username,
-          ip: user.ip,
-          joinedAt: user.joinedAt,
-          lastActive: user.lastActive
-        });
-      });
-    }
-  });
-
+  // Simple response for now - will implement when rooms are properly tracked
   res.json({
-    connectedUsers,
-    totalUsers: connectedUsers.length,
-    uniqueIPs: [...new Set(connectedUsers.map(u => u.ip))].length
+    connectedUsers: [],
+    totalUsers: 0,
+    uniqueIPs: 0
   });
 });
 
-// Admin: Get IP activity history
+// Admin: Get IP activity history  
 apiRouter.get('/admin/ip-history', adminSessionAuth, (req, res) => {
-  const ipHistory = global.ipHistory || [];
-  res.json({ ipHistory });
+  // Simple response for now
+  res.json({ ipHistory: [] });
 });
   const stats = getStats();
   res.json({
