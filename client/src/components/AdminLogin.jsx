@@ -16,7 +16,8 @@ export default function AdminLogin({ onLogin }) {
 
     try {
       // Gửi username + password để xác thực
-      const response = await fetch('/api/admin/login', {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
+      const response = await fetch(`${backendUrl}/api/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -18,7 +18,8 @@ export default function AdminDashboard({ token, onLogout }) {
 
   async function fetchStats() {
     try {
-      const response = await fetch('/api/admin/stats', {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
+      const response = await fetch(`${backendUrl}/api/admin/stats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -34,7 +35,8 @@ export default function AdminDashboard({ token, onLogout }) {
     if (!banIP.trim()) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/ban-ip', {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
+      const response = await fetch(`${backendUrl}/api/admin/ban-ip`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +59,8 @@ export default function AdminDashboard({ token, onLogout }) {
     if (!unbanIP.trim()) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/unban-ip', {
+      const backendUrl = import.meta.env.VITE_API_URL || 'https://nope-chat.onrender.com';
+      const response = await fetch(`${backendUrl}/api/admin/unban-ip`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
