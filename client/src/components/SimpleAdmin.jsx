@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export default function SimpleAdmin() {
@@ -9,6 +9,10 @@ export default function SimpleAdmin() {
   const [banIP, setBanIP] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [ipActivity, setIpActivity] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -27,6 +31,8 @@ export default function SimpleAdmin() {
         setToken(data.token);
         setIsLoggedIn(true);
         setMessage('Login successful!');
+        // Start fetching data
+        fetchAllData(data.token);
       } else {
         setMessage(data.message || 'Login failed');
       }
@@ -37,7 +43,53 @@ export default function SimpleAdmin() {
     }
   }
 
-  async function handleBanIP() {
+  // Fetch all admin data
+  async function fetchAllData(authToken) {
+    const token = authToken || token;
+    if (!token) return;
+
+    try {
+      // Fetch stats
+      const statsRes = await fetch('https://nope-chat.onrender.com/api/admin/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData);
+      }
+
+      // Fetch online users
+      const usersRes = await fetch('https://nope-chat.onrender.com/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        setOnlineUsers(usersData.onlineUsers || []);
+      }
+
+      // Fetch IP activity
+      const activityRes = await fetch('https://nope-chat.onrender.com/api/admin/ip-activity', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (activityRes.ok) {
+        const activityData = await activityRes.json();
+        setIpActivity(activityData.ipActivity || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin data:', err);
+    }
+  }
+
+  // Auto-refresh data every 5 seconds
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      fetchAllData();
+      const interval = setInterval(() => fetchAllData(), 5000);
+      return () => clearInterval(interval);
+    }
+  }, [isLoggedIn, token]);
+
+  async function handleBanIP(ipToBan = null) {
     if (!banIP.trim()) return;
     setLoading(true);
     try {

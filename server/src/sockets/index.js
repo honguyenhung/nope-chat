@@ -17,24 +17,26 @@ import {
 import { containsProfanity } from '../utils/profanityFilter.js';
 
 export function registerSocketHandlers(io) {
-  // Initialize global IP tracking
-  if (!global.ipHistory) global.ipHistory = [];
-  if (!global.rooms) global.rooms = new Map();
+  // Store io globally for admin access
+  global.io = io;
+  
+  // Initialize IP activity tracking
+  if (!global.ipActivity) global.ipActivity = [];
 
   io.on('connection', (socket) => {
     const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
 
-    // Track IP activity
-    global.ipHistory.unshift({
+    // Log IP activity
+    global.ipActivity.unshift({
       ip,
-      action: 'connect',
+      action: 'connected',
       timestamp: Date.now(),
       socketId: socket.id
     });
     
     // Keep only last 1000 entries
-    if (global.ipHistory.length > 1000) {
-      global.ipHistory = global.ipHistory.slice(0, 1000);
+    if (global.ipActivity.length > 1000) {
+      global.ipActivity = global.ipActivity.slice(0, 1000);
     }
 
     // Check if IP is banned
@@ -185,6 +187,16 @@ export function registerSocketHandlers(io) {
         timestamp:        Date.now(),
       };
 
+      // Store message for admin access
+      if (!global.roomMessages) global.roomMessages = {};
+      if (!global.roomMessages[targetRoom]) global.roomMessages[targetRoom] = [];
+      global.roomMessages[targetRoom].push(message);
+      
+      // Keep only last 1000 messages per room
+      if (global.roomMessages[targetRoom].length > 1000) {
+        global.roomMessages[targetRoom] = global.roomMessages[targetRoom].slice(-1000);
+      }
+
       addMessageToRoom(targetRoom, message);
 
       if (recipientId) {
@@ -212,6 +224,14 @@ export function registerSocketHandlers(io) {
 
     // --- Disconnect: mark offline, keep in list for 60s ---
     socket.on('disconnect', () => {
+      // Log disconnect
+      global.ipActivity.unshift({
+        ip,
+        action: 'disconnected',
+        timestamp: Date.now(),
+        socketId: socket.id
+      });
+
       cleanupSocketLimit(socket.id);
       releaseConnection(ip, socket.id);
 
