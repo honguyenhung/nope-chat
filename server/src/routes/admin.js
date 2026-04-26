@@ -277,7 +277,7 @@ adminRouter.post('/send-message', adminAuth, (req, res) => {
     const adminMessage = {
       id: Date.now().toString(),
       username: '👑 Admin',
-      message: message.trim(),
+      text: message.trim(), // Use 'text' instead of 'message'
       timestamp: Date.now(),
       isAdmin: true
     };

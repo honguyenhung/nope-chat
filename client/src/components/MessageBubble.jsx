@@ -30,7 +30,7 @@ function Lightbox({ src, onClose }) {
 }
 
 export default function MessageBubble({ message, isOwn }) {
-  const { username, text, imageData, timestamp, optimistic } = message;
+  const { username, text, imageData, timestamp, optimistic, isAdmin } = message;
   const [lightbox, setLightbox] = useState(false);
   const [copied, setCopied]     = useState(false);
   const color = nameColor(username ?? '?');
@@ -38,6 +38,38 @@ export default function MessageBubble({ message, isOwn }) {
   function copy() {
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
+  }
+
+  // Admin message styling
+  if (isAdmin) {
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 10, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        className="flex justify-center mb-3"
+      >
+        <div className="max-w-md px-4 py-2 rounded-xl text-center"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(220,38,38,0.1), rgba(239,68,68,0.1))',
+            border: '1px solid rgba(220,38,38,0.3)',
+            color: 'var(--text-1)'
+          }}>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="text-lg">👑</span>
+            <span className="font-bold text-sm" style={{ color: '#dc2626' }}>
+              {username}
+            </span>
+            <span className="text-xs" style={{ color: 'var(--text-3)' }}>
+              {formatTime(timestamp)}
+            </span>
+          </div>
+          <p className="text-sm font-medium">{text}</p>
+        </div>
+      </motion.div>
+    );
   }
 
   return (

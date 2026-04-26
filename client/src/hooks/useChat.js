@@ -63,6 +63,18 @@ export function useChat(roomId, password = null) {
       });
     });
 
+    // Handle admin messages (unencrypted)
+    socket.on('admin_message', (adminMsg) => {
+      setMessages((prev) => {
+        const next = [...prev, {
+          ...adminMsg,
+          isAdmin: true,
+          decrypted: adminMsg.message // Admin messages are plain text
+        }];
+        return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
+      });
+    });
+
     socket.on('room_users', ({ users }) => setUsers(users));
 
     socket.on('user_joined', ({ socketId, publicKey }) => {
