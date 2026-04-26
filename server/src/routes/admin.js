@@ -33,7 +33,7 @@ setInterval(() => {
 }, 60 * 60 * 1000);
 
 // Admin login
-adminRouter.post('/login', rateLimiter, (req, res) => {
+adminRouter.post('/login', (req, res) => {
   const { username, password } = req.body;
   
   if (!username || !password) {
@@ -207,6 +207,8 @@ adminRouter.delete('/messages/:roomId/:messageId', adminAuth, (req, res) => {
 adminRouter.delete('/messages/:roomId', adminAuth, (req, res) => {
   const { roomId } = req.params;
   
+  console.log(`Admin attempting to clear room: ${roomId}`);
+  
   // Only clear messages, don't delete the room itself
   if (!global.roomMessages) global.roomMessages = {};
   global.roomMessages[roomId] = [];
@@ -217,14 +219,16 @@ adminRouter.delete('/messages/:roomId', adminAuth, (req, res) => {
       clearedBy: 'admin',
       message: '🧹 Admin cleared all messages in this room'
     });
+    console.log(`Successfully cleared messages in room: ${roomId}`);
+  } else {
+    console.error('Socket.io not available for room clear broadcast');
   }
-  
-  console.log(`Admin cleared messages in room: ${roomId}`);
   
   res.json({ 
     success: true, 
     message: `Messages cleared from ${roomId === 'global' ? 'Global Room' : 'room ' + roomId}`,
-    roomId 
+    roomId,
+    timestamp: Date.now()
   });
 });
 

@@ -75,8 +75,11 @@ app.get('/', (req, res) => {
   res.redirect(CLIENT_URL);
 });
 
+// Admin routes first - completely bypass rate limiting
+app.use('/api/admin', adminRouter);
+
+// Regular API routes with rate limiting  
 app.use('/api', rateLimiter, apiRouter);
-app.use('/api/admin', adminRouter); // Admin routes without rate limiting
 
 // --- Socket handlers ---
 registerSocketHandlers(io);
