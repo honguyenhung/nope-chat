@@ -198,12 +198,20 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
           <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {text && onReply && (
               <button onClick={() => {
-                // Extract original message content, remove any reply prefix (with or without username)
-                // Matches: ↩ "text" OR ↩ username: "text"
-                const cleanText = text
-                  .replace(/^↩\s*"[^"]*"\n/, '') // Remove ↩ "quoted text"
-                  .replace(/^↩\s+[^:]+:\s*"[^"]*"\n/, '') // Remove ↩ username: "quoted text"
+                // Extract original message: get the last line after all reply prefixes
+                // Split by newlines and get the last non-empty line
+                const lines = text.split('\n').filter(line => line.trim());
+                
+                // Get the last line (actual message content)
+                let cleanText = lines[lines.length - 1] || text;
+                
+                // If it still contains reply symbols or quotes, try to extract just the content
+                // Remove any remaining ↩ symbols and quoted parts
+                cleanText = cleanText
+                  .replace(/^[↩\s"]+/, '') // Remove leading ↩, spaces, quotes
+                  .replace(/["]+$/, '') // Remove trailing quotes
                   .trim();
+                
                 onReply({ username, text: cleanText });
               }}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
