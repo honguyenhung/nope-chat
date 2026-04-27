@@ -1,9 +1,9 @@
 import rateLimit from 'express-rate-limit';
 
-// HTTP API rate limiter
+// HTTP API rate limiter - STRICTER
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: 50, // Was 100
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' },
@@ -12,20 +12,30 @@ export const rateLimiter = rateLimit({
 // Per-socket message rate limiter (in-memory token bucket)
 const socketLimits = new Map(); // socketId -> { count, resetAt }
 const socketEventLimits = new Map(); // socketId -> { eventCounts: {}, resetAt }
+const ipRequestCount = new Map(); // ip -> { count, resetAt } - NEW: Track per-IP across all sockets
 
-export function checkSocketRateLimit(socketId) {
+// STRICTER: 10 messages per 10 seconds (was 30)
+export function checkSocketRateLimit(socketId, ip) {
   const now = Date.now();
   const limit = socketLimits.get(socketId);
 
   if (!limit || now > limit.resetAt) {
-    // Reset window: allow 30 messages per 10 seconds
+    // Reset window: allow 10 messages per 10 seconds
     socketLimits.set(socketId, { count: 1, resetAt: now + 10_000 });
-    return true;
+  } else {
+    if (limit.count >= 10) return false; // Rate limited
+    limit.count++;
   }
 
-  if (limit.count >= 30) return false; // Rate limited
+  // NEW: Per-IP limit across ALL sockets - 30 messages per minute
+  const ipLimit = ipRequestCount.get(ip);
+  if (!ipLimit || now > ipLimit.resetAt) {
+    ipRequestCount.set(ip, { count: 1, resetAt: now + 60_000 });
+  } else {
+    if (ipLimit.count >= 30) return false; // IP rate limited
+    ipLimit.count++;
+  }
 
-  limit.count++;
   return true;
 }
 
@@ -51,3 +61,13 @@ export function cleanupSocketLimit(socketId) {
   socketLimits.delete(socketId);
   socketEventLimits.delete(socketId);
 }
+
+// NEW: Cleanup IP limits periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, limit] of ipRequestCount.entries()) {
+    if (now > limit.resetAt) {
+      ipRequestCount.delete(ip);
+    }
+  }
+}, 60_000); // Every minute

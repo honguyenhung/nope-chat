@@ -2,11 +2,12 @@
 const ipConnections = new Map(); // ip -> Set of socketIds
 const ipBlacklist = new Set(); // IPs that are temporarily banned
 const ipViolations = new Map(); // ip -> { count, resetAt }
+const banHistory = new Map(); // ip -> ban count - NEW: Track repeat offenders
 
-const MAX_CONNECTIONS_PER_IP = 5;
-const MAX_VIOLATIONS_BEFORE_BAN = 10; // 10 violations in 5 minutes = 1 hour ban
+const MAX_CONNECTIONS_PER_IP = 3; // STRICTER: Was 5
+const MAX_VIOLATIONS_BEFORE_BAN = 5; // STRICTER: Was 10
 const VIOLATION_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
-const BAN_DURATION_MS = 60 * 60 * 1000; // 1 hour
+const BAN_DURATION_MS = 24 * 60 * 60 * 1000; // LONGER: 24 hours (was 1 hour)
 
 export function trackConnection(ip, socketId) {
   // Check if IP is blacklisted
@@ -52,9 +53,17 @@ export function recordViolation(ip, reason) {
   }
 }
 
+// NEW: Escalating ban duration for repeat offenders
 function banIP(ip) {
+  const banCount = (banHistory.get(ip) || 0) + 1;
+  banHistory.set(ip, banCount);
+  
+  // Escalating: 24h, 48h, 96h, 192h...
+  const duration = BAN_DURATION_MS * Math.pow(2, banCount - 1);
+  const hours = duration / 1000 / 60 / 60;
+  
   ipBlacklist.add(ip);
-  console.log(`🔨 IP ${ip} banned for ${BAN_DURATION_MS / 1000 / 60} minutes`);
+  console.log(`🔨 IP ${ip} banned for ${hours} hours (ban #${banCount})`);
   
   // Disconnect all existing connections from this IP
   const sockets = ipConnections.get(ip);
@@ -68,8 +77,8 @@ function banIP(ip) {
   setTimeout(() => {
     ipBlacklist.delete(ip);
     ipViolations.delete(ip);
-    console.log(`✅ IP ${ip} unbanned`);
-  }, BAN_DURATION_MS);
+    console.log(`✅ IP ${ip} unbanned after ${hours} hours`);
+  }, duration);
 }
 
 export function isIPBanned(ip) {
@@ -84,5 +93,6 @@ export function manualBanIP(ip) {
 export function manualUnbanIP(ip) {
   ipBlacklist.delete(ip);
   ipViolations.delete(ip);
+  banHistory.delete(ip);
   console.log(`✅ IP ${ip} manually unbanned`);
 }

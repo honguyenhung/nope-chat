@@ -142,7 +142,27 @@ export function registerSocketHandlers(io) {
     socket.on('send_message', ({ roomId, encryptedContent, iv, recipientId, encryptedImage, imageIv, encryptedFile, fileIv, fileMetadata }) => {
       incrementMessages(); // Monitor message rate
       
-      if (!checkSocketRateLimit(socket.id)) {
+      // NEW: Strict payload validation
+      const payloadSize = JSON.stringify({ encryptedContent, iv, encryptedImage, imageIv, encryptedFile, fileIv }).length;
+      if (payloadSize > 20_000_000) { // 20MB max total payload
+        recordViolation(ip, 'payload_too_large');
+        socket.emit('error', { message: 'Payload too large.' });
+        return;
+      }
+      
+      // NEW: Check for injection attempts
+      const payloadStr = JSON.stringify({ roomId, encryptedContent, iv, fileMetadata });
+      if (payloadStr.includes('<script>') || 
+          payloadStr.includes('javascript:') ||
+          payloadStr.includes('onerror=') ||
+          payloadStr.includes('eval(') ||
+          payloadStr.includes('onclick=')) {
+        recordViolation(ip, 'injection_attempt');
+        socket.disconnect(true);
+        return;
+      }
+      
+      if (!checkSocketRateLimit(socket.id, ip)) {
         recordViolation(ip, 'message_spam');
         socket.emit('error', { message: 'Slow down! You are sending messages too fast.' });
         return;

@@ -94,16 +94,38 @@ export async function decryptBytes(key, ciphertext, ivBase64) {
   }
 }
 
-/** Encrypt a UTF-8 string → { ciphertext, iv } */
+/** Encrypt a UTF-8 string → { ciphertext, iv, timestamp } */
 export async function encryptMessage(key, plaintext) {
-  return encryptBytes(key, new TextEncoder().encode(plaintext));
+  // Add timestamp for replay attack protection
+  const timestamp = Date.now();
+  const payload = JSON.stringify({ text: plaintext, ts: timestamp });
+  const encrypted = await encryptBytes(key, new TextEncoder().encode(payload));
+  return { ...encrypted, timestamp };
 }
 
-/** Decrypt to string, or null on failure */
+/** Decrypt to string, or null on failure. Validates timestamp to prevent replay attacks. */
 export async function decryptMessage(key, ciphertext, iv) {
   const bytes = await decryptBytes(key, ciphertext, iv);
   if (!bytes) return null;
-  return new TextDecoder().decode(bytes);
+  
+  try {
+    const decoded = new TextDecoder().decode(bytes);
+    const payload = JSON.parse(decoded);
+    
+    // Replay attack protection: reject messages older than 5 minutes
+    if (payload.ts) {
+      const age = Date.now() - payload.ts;
+      if (age > 5 * 60 * 1000) {
+        console.warn('Rejected old message (replay attack protection)');
+        return null;
+      }
+    }
+    
+    return payload.text || decoded; // Fallback for old format
+  } catch {
+    // Fallback for messages encrypted with old format (no timestamp)
+    return new TextDecoder().decode(bytes);
+  }
 }
 
 /**
@@ -123,7 +145,7 @@ export async function decryptImage(key, ciphertext, iv) {
 
 /**
  * Derive a deterministic AES-GCM-256 room key from roomId.
- * PBKDF2 with 600k iterations (OWASP 2023).
+ * PBKDF2 with 1M iterations + SHA-512 (maximum security).
  * All members of the same room derive the same key client-side.
  */
 export async function deriveRoomKey(roomId) {
@@ -138,8 +160,8 @@ export async function deriveRoomKey(roomId) {
     {
       name: 'PBKDF2',
       salt: new TextEncoder().encode('anon-chat-room-v2'),
-      iterations: 600_000,
-      hash: 'SHA-256',
+      iterations: 1_000_000,
+      hash: 'SHA-512',
     },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
@@ -177,8 +199,8 @@ export async function derivePasswordKey(roomId, password, saltB64 = null) {
     {
       name: 'PBKDF2',
       salt,
-      iterations: 600_000,
-      hash: 'SHA-256',
+      iterations: 1_000_000,
+      hash: 'SHA-512',
     },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
