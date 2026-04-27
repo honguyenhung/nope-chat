@@ -1,29 +1,35 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { THEMES } from '../hooks/useTheme.js';
+import { setCustomBlob } from './VideoBackground.jsx';
 
 export default function ThemeSelector({ theme, onSelect }) {
   const [open, setOpen] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
-  const [customUrl, setCustomUrl] = useState(() => localStorage.getItem('custom_bg_url') || '');
-  const [customType, setCustomType] = useState(() => localStorage.getItem('custom_bg_type') || 'image');
+  const [customType, setCustomType] = useState('image');
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const current = THEMES.find(t => t.id === theme) || { icon: '✏️', label: 'Custom' };
 
+  function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+  }
+
   function applyCustom() {
-    if (!customUrl.trim()) return;
-    localStorage.setItem('custom_bg_url', customUrl.trim());
-    localStorage.setItem('custom_bg_type', customType);
+    if (!selectedFile) return;
+    const blobUrl = URL.createObjectURL(selectedFile);
+    setCustomBlob(blobUrl, customType);
     onSelect('custom');
     setShowCustom(false);
     setOpen(false);
   }
 
   function clearCustom() {
-    localStorage.removeItem('custom_bg_url');
-    localStorage.removeItem('custom_bg_type');
+    setCustomBlob(null, 'image');
+    setSelectedFile(null);
     onSelect('darkblue');
-    setCustomUrl('');
     setShowCustom(false);
   }
 
@@ -118,7 +124,6 @@ export default function ThemeSelector({ theme, onSelect }) {
                     ))}
                   </div>
 
-                  {/* Upload file */}
                   <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl cursor-pointer transition-all hover:scale-[1.02]"
                     style={{ background: 'var(--panel-hover)', border: '2px dashed var(--border)' }}>
                     <span className="text-2xl">{customType === 'image' ? '🖼️' : '🎬'}</span>
@@ -132,30 +137,24 @@ export default function ThemeSelector({ theme, onSelect }) {
                       type="file"
                       accept={customType === 'image' ? 'image/*' : 'video/*'}
                       className="hidden"
-                      onChange={e => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = ev => setCustomUrl(ev.target.result);
-                        reader.readAsDataURL(file);
-                      }}
+                      onChange={handleFileChange}
                     />
                   </label>
 
-                  {customUrl && (
+                  {selectedFile && (
                     <div className="flex items-center gap-2 p-2 rounded-xl"
                       style={{ background: 'rgba(59,165,93,0.1)', border: '1px solid rgba(59,165,93,0.3)' }}>
                       <span className="text-green-400 text-sm">✓</span>
                       <span className="text-xs truncate flex-1" style={{ color: '#3ba55d' }}>
-                        File đã chọn
+                        {selectedFile.name}
                       </span>
-                      <button onClick={() => setCustomUrl('')}
-                        className="text-xs" style={{ color: 'var(--text-3)' }}>✕</button>
+                      <button onClick={() => setSelectedFile(null)}
+                        className="text-xs shrink-0" style={{ color: 'var(--text-3)' }}>✕</button>
                     </div>
                   )}
 
                   <div className="flex gap-2">
-                    <button onClick={applyCustom} disabled={!customUrl.trim()}
+                    <button onClick={applyCustom} disabled={!selectedFile}
                       className="btn btn-grad flex-1 py-1.5 text-xs">
                       Áp dụng
                     </button>
