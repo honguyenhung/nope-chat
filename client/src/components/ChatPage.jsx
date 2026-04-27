@@ -19,6 +19,7 @@ import FilePreview from './FilePreview.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import ThemeSelector from './ThemeSelector.jsx';
 import SecurityBadge from './SecurityBadge.jsx';
+import KeyboardShortcutsModal from './KeyboardShortcutsModal.jsx';
 
 export default function ChatPage() {
   const { roomId }      = useParams();
@@ -73,6 +74,7 @@ export default function ChatPage() {
   const [replyTo, setReplyTo]       = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [mentionList, setMentionList] = useState([]);
   const [showMention, setShowMention] = useState(false);
 
@@ -133,6 +135,10 @@ export default function ChatPage() {
           setSearchQuery('');
           e.preventDefault();
         }
+        if (showShortcuts) {
+          setShowShortcuts(false);
+          e.preventDefault();
+        }
       }
       
       // Ctrl+K or Cmd+K - Toggle search
@@ -143,18 +149,14 @@ export default function ChatPage() {
 
       // Ctrl+/ or Cmd+/ - Show shortcuts help
       if ((e.ctrlKey || e.metaKey) && e.key === '/') {
-        alert('⌨️ Keyboard Shortcuts:\n\n' +
-          'Esc - Clear reply or close search\n' +
-          'Ctrl+K - Toggle search\n' +
-          'Enter - Send message\n' +
-          'Shift+Enter - New line');
+        setShowShortcuts(true);
         e.preventDefault();
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [replyTo, showSearch]);
+  }, [replyTo, showSearch, showShortcuts]);
 
   function onScroll() {
     const el = scrollRef.current;
@@ -472,12 +474,7 @@ export default function ChatPage() {
           {/* Right side */}
           <div className="flex items-center gap-3 shrink-0">
             {/* Keyboard shortcuts hint */}
-            <button onClick={() => alert('⌨️ Keyboard Shortcuts:\n\n' +
-              'Esc - Clear reply or close search\n' +
-              'Ctrl+K - Toggle search\n' +
-              'Ctrl+/ - Show this help\n' +
-              'Enter - Send message\n' +
-              'Shift+Enter - New line')}
+            <button onClick={() => setShowShortcuts(true)}
               className="hidden md:flex p-2 rounded-xl transition-all"
               style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
               title="Keyboard shortcuts (Ctrl+/)">
@@ -710,6 +707,9 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal show={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   );
 }
