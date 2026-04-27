@@ -95,9 +95,9 @@ export default function LandingPage() {
         >
           {/* Logo */}
           <div className="relative inline-flex mb-5">
-            <div className="w-20 h-20 rounded-[1.5rem] flex items-center justify-center text-4xl select-none"
-              style={{ background: 'linear-gradient(135deg,#7c6af7,#5b8af5)', boxShadow: '0 8px 40px rgba(124,106,247,0.5)' }}>
-              👻
+            <div className="w-20 h-20 rounded-[1.5rem] overflow-hidden select-none"
+              style={{ boxShadow: '0 8px 40px rgba(124,106,247,0.5)' }}>
+              <img src="/avatar.png" alt="Nope" className="w-full h-full object-cover" />
             </div>
             {/* Ping dot */}
             <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
