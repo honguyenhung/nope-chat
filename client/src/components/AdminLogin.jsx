@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import VideoBackground from './VideoBackground.jsx';
+import { useThemeContext } from '../App.jsx';
 
 export default function AdminLogin({ onLogin }) {
+  const { theme } = useThemeContext();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -45,7 +48,8 @@ export default function AdminLogin({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 relative" style={{ background: 'var(--bg)' }}>
+      <VideoBackground theme={theme} />
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       

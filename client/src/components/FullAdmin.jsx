@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ThemeSelector from './ThemeSelector.jsx';
+import VideoBackground from './VideoBackground.jsx';
 import { useThemeContext } from '../App.jsx';
 import { THEMES } from '../hooks/useTheme.js';
 
@@ -341,7 +342,8 @@ export default function FullAdmin() {
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 admin-panel" style={{ background: 'var(--bg)' }}>
+      <div className="min-h-screen flex items-center justify-center px-4 admin-panel relative" style={{ background: 'var(--bg)' }}>
+        <VideoBackground theme={theme} />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -398,6 +400,7 @@ export default function FullAdmin() {
 
   return (
     <div className="min-h-screen relative z-10 admin-panel" style={{ background: 'var(--bg)', backdropFilter: 'blur(2px)' }}>
+      <VideoBackground theme={theme} />
       {/* Header */}
       <header className="border-b sticky top-0 z-20" style={{ background: 'var(--panel)', borderColor: 'var(--border)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">

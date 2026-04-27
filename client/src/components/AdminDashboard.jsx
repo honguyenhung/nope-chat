@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import VideoBackground from './VideoBackground.jsx';
+import { useThemeContext } from '../App.jsx';
 
 export default function AdminDashboard({ token, onLogout }) {
+  const { theme } = useThemeContext();
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [banIP, setBanIP] = useState('');
@@ -125,7 +128,8 @@ export default function AdminDashboard({ token, onLogout }) {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
+      <VideoBackground theme={theme} />
       {/* Header */}
       <header className="border-b" style={{ background: 'var(--panel)', borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
