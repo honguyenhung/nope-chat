@@ -89,9 +89,6 @@ export default function LandingPage() {
           <h1 className="text-5xl font-extrabold tracking-tight mb-2">
             <span className="grad-text">Nope</span>
           </h1>
-          <p className="text-sm font-medium" style={{ color: 'var(--text-2)' }}>
-            No account · No trace · End-to-end encrypted
-          </p>
         </motion.div>
 
         {/* ── Identity card ── */}
@@ -299,6 +296,122 @@ export default function LandingPage() {
           >
             👑 admin
           </button>
+        </motion.div>
+
+        {/* ── Support & Contact ── */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+          className="glass w-full p-5"
+        >
+          <div className="text-center mb-4">
+            <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-1)' }}>
+              💬 Need Help or Support?
+            </p>
+            <p className="text-xs" style={{ color: 'var(--text-3)' }}>
+              Get in touch with us through any platform below
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {/* Email */}
+            <a
+              href="mailto:honguyenhung2010@gmail.com"
+              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
+              style={{ 
+                background: 'linear-gradient(135deg, #ea4335, #d33b2c)', 
+                color: 'white',
+                textDecoration: 'none'
+              }}
+            >
+              <span className="text-lg">📧</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold">Email</div>
+                <div className="text-[10px] opacity-90 truncate">Gmail</div>
+              </div>
+            </a>
+
+            {/* Zalo */}
+            <a
+              href="https://zalo.me/0355417718"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
+              style={{ 
+                background: 'linear-gradient(135deg, #0068ff, #0052cc)', 
+                color: 'white',
+                textDecoration: 'none'
+              }}
+            >
+              <span className="text-lg">💬</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold">Zalo</div>
+                <div className="text-[10px] opacity-90">0355417718</div>
+              </div>
+            </a>
+
+            {/* Facebook */}
+            <a
+              href="https://web.facebook.com/Nguyen.Hvng"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
+              style={{ 
+                background: 'linear-gradient(135deg, #1877f2, #166fe5)', 
+                color: 'white',
+                textDecoration: 'none'
+              }}
+            >
+              <span className="text-lg">📘</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold">Facebook</div>
+                <div className="text-[10px] opacity-90 truncate">Nguyen.Hvng</div>
+              </div>
+            </a>
+
+            {/* Discord */}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigator.clipboard.writeText('.yennhimylove_');
+                alert('Discord username copied to clipboard!');
+              }}
+              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform cursor-pointer"
+              style={{ 
+                background: 'linear-gradient(135deg, #5865f2, #4752c4)', 
+                color: 'white',
+                textDecoration: 'none'
+              }}
+            >
+              <span className="text-lg">🎮</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold">Discord</div>
+                <div className="text-[10px] opacity-90 truncate">.yennhimylove_</div>
+              </div>
+            </a>
+          </div>
+
+          {/* Community Chat */}
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <button
+              onClick={() => navigate('/global')}
+              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
+              style={{ 
+                background: 'var(--accent)',
+                color: 'white'
+              }}
+            >
+              <span className="text-lg">🌐</span>
+              <div>
+                <div className="text-sm font-semibold">Join Community Chat</div>
+                <div className="text-xs opacity-90">Ask questions & get help from other users</div>
+              </div>
+            </button>
+          </div>
+
+          <p className="text-center text-[10px] mt-3 opacity-60" style={{ color: 'var(--text-3)' }}>
+            ⚡ Fast response • 🇻🇳 Vietnamese & English support
+          </p>
         </motion.div>
       </div>
     </div>
