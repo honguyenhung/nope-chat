@@ -228,16 +228,22 @@ export default function ChatPage() {
   function onKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }
 
   // Drag & Drop handlers
+  const dragCounter = useRef(0);
+
   function handleDragEnter(e) {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(true);
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
   }
 
   function handleDragLeave(e) {
     e.preventDefault();
     e.stopPropagation();
-    if (e.currentTarget === e.target) {
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
       setIsDragging(false);
     }
   }
@@ -251,6 +257,7 @@ export default function ChatPage() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
+    dragCounter.current = 0;
 
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
@@ -281,6 +288,29 @@ export default function ChatPage() {
       reader.readAsDataURL(file);
     }
   }
+
+  // Reset drag state when mouse leaves window
+  useEffect(() => {
+    function handleWindowDragLeave(e) {
+      if (e.clientX === 0 && e.clientY === 0) {
+        setIsDragging(false);
+        dragCounter.current = 0;
+      }
+    }
+    
+    function handleWindowDrop() {
+      setIsDragging(false);
+      dragCounter.current = 0;
+    }
+
+    window.addEventListener('dragleave', handleWindowDragLeave);
+    window.addEventListener('drop', handleWindowDrop);
+    
+    return () => {
+      window.removeEventListener('dragleave', handleWindowDragLeave);
+      window.removeEventListener('drop', handleWindowDrop);
+    };
+  }, []);
 
   const onlineCount = users.filter((u) => u.online !== false).length;
   const roomLabel   = isGlobal ? 'Global' : (effectiveRoom.length > 18 ? effectiveRoom.slice(0,8)+'…' : effectiveRoom);
