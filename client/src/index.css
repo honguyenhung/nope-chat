@@ -502,6 +502,11 @@
   input, textarea, select {
     font-size: 16px !important;
   }
+  
+  /* Override smaller font sizes for inputs */
+  input.field, textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* Better touch targets */

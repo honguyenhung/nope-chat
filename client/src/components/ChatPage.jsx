@@ -363,6 +363,7 @@ export default function ChatPage() {
               placeholder="Enter room password..."
               autoFocus
               className="field w-full"
+              style={{ fontSize: '16px' }}
             />
             <button type="submit" disabled={!pendingPassword.trim()}
               className="btn btn-grad w-full py-2.5">
@@ -690,8 +691,9 @@ export default function ChatPage() {
             <textarea ref={textareaRef} value={input} onChange={onInput} onKeyDown={onKey}
               placeholder={connected ? 'Write a message…' : 'Reconnecting...'}
               disabled={!connected} rows={1}
-              className="flex-1 resize-none outline-none text-sm rounded-xl px-3 md:px-4 py-2 md:py-2.5 max-h-28 font-[inherit]"
+              className="flex-1 resize-none outline-none rounded-xl px-3 md:px-4 py-2 md:py-2.5 max-h-28 font-[inherit]"
               style={{
+                fontSize: '16px',
                 background: 'var(--input-bg)', color: 'var(--text-1)',
                 border: '1.5px solid var(--border)', opacity: connected ? 1 : 0.5,
                 transition: 'border-color 0.15s, box-shadow 0.15s',

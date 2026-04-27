@@ -143,7 +143,7 @@ export default function LandingPage() {
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-3)' }}>Choose your identity</p>
               <form onSubmit={handleSaveNick} className="flex gap-2">
                 <input value={nickInput} onChange={(e) => setNickInput(e.target.value)}
-                  maxLength={24} placeholder="Your nickname..." autoFocus className="field flex-1" />
+                  maxLength={24} placeholder="Your nickname..." autoFocus className="field flex-1" style={{ fontSize: '16px' }} />
                 <button type="submit" disabled={!nickInput.trim()} className="btn btn-grad px-5">Go</button>
               </form>
               <button type="button"
@@ -191,7 +191,7 @@ export default function LandingPage() {
                   onSubmit={handleJoin} className="space-y-3"
                 >
                   <input value={joinInput} onChange={(e) => setJoinInput(e.target.value)}
-                    placeholder="Enter room code or name..." maxLength={64} className="field" />
+                    placeholder="Enter room code or name..." maxLength={64} className="field" style={{ fontSize: '16px' }} />
                   {joinInput.trim() && (
                     <p className="text-xs font-mono px-1" style={{ color: 'var(--text-3)' }}>
                       /room/<span style={{ color: 'var(--accent)' }}>{slugify(joinInput)}</span>
@@ -238,6 +238,7 @@ export default function LandingPage() {
                       placeholder="Leave blank for open room..."
                       maxLength={64}
                       className="field w-full"
+                      style={{ fontSize: '16px' }}
                     />
                     {roomPassword.trim() && (
                       <p className="text-[11px] flex items-center gap-1" style={{ color: '#3ba55d' }}>
