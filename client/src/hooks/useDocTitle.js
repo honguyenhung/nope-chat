@@ -1,18 +1,19 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
-// Updates browser tab title with unread count + restores on focus
+const APP_NAME = 'Nope Privacy';
+
 export function useDocTitle(roomName, unreadCount) {
-  const baseTitle = roomName ? `${roomName} — AnonChat` : 'AnonChat';
+  const baseTitle = roomName ? `${roomName} — ${APP_NAME}` : APP_NAME;
 
   useEffect(() => {
     document.title = unreadCount > 0 ? `(${unreadCount}) ${baseTitle}` : baseTitle;
+
+    // Reset về tên app khi unmount (rời khỏi room)
+    return () => { document.title = APP_NAME; };
   }, [unreadCount, baseTitle]);
 
-  // Restore title and clear unread when tab is focused
   useEffect(() => {
-    function onFocus() {
-      document.title = baseTitle;
-    }
+    function onFocus() { document.title = baseTitle; }
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, [baseTitle]);

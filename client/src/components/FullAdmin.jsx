@@ -24,7 +24,7 @@ export default function FullAdmin() {
   const [unbanIP, setUnbanIP] = useState('');
   const [adminMessage, setAdminMessage] = useState('');
 
-  const API_BASE = 'https://nope-chat.onrender.com/api/admin';
+  const API_BASE = `${import.meta.env.VITE_SERVER_URL || 'https://nope-chat.onrender.com'}/api/admin`;
 
   // Check if already logged in on component mount
   useEffect(() => {

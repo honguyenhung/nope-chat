@@ -52,13 +52,16 @@ function Lightbox({ src, onClose }) {
   );
 }
 
-export default function MessageBubble({ message, isOwn, onReply }) {
-  const { username, text, imageData, timestamp, optimistic, isAdmin } = message;
+export default function MessageBubble({ message, isOwn, onReply, highlight }) {
+  const { id, username, text, imageData, timestamp, optimistic, isAdmin } = message;
   const [lightbox, setLightbox]     = useState(false);
   const [copied, setCopied]         = useState(false);
   const [reactions, setReactions]   = useState({});
   const [showReact, setShowReact]   = useState(false);
   const [isNew, setIsNew]           = useState(true);
+  const [editing, setEditing]       = useState(false);
+  const [editText, setEditText]     = useState(text || '');
+  const [deleted, setDeleted]       = useState(false);
   const color = nameColor(username ?? '?');
 
   // "new message" glow effect — fades after 2s
@@ -73,12 +76,22 @@ export default function MessageBubble({ message, isOwn, onReply }) {
   }
 
   function addReaction(emoji) {
-    setReactions(prev => ({
-      ...prev,
-      [emoji]: (prev[emoji] || 0) + 1
-    }));
+    setReactions(prev => ({ ...prev, [emoji]: (prev[emoji] || 0) + 1 }));
     setShowReact(false);
   }
+
+  // Highlight search text
+  function highlightText(str, query) {
+    if (!query?.trim()) return str;
+    const parts = str.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    return parts.map((part, i) =>
+      part.toLowerCase() === query.toLowerCase()
+        ? <mark key={i} style={{ background: 'var(--accent-glow)', color: 'var(--accent)', borderRadius: 3 }}>{part}</mark>
+        : part
+    );
+  }
+
+  if (deleted) return null;
 
   // Admin message styling
   if (isAdmin) {
@@ -160,9 +173,34 @@ export default function MessageBubble({ message, isOwn, onReply }) {
           )}
 
           {/* Text */}
-          {text && (
+          {text && !editing && (
             <div className={`px-4 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap ${isOwn ? 'bubble-me' : 'bubble-them'}`}>
-              {text}
+              {highlightText(text, highlight)}
+            </div>
+          )}
+
+          {/* Edit mode */}
+          {editing && (
+            <div className="flex flex-col gap-1 w-full">
+              <textarea
+                value={editText}
+                onChange={e => setEditText(e.target.value)}
+                className="field text-sm resize-none"
+                rows={2}
+                autoFocus
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditing(false); }
+                  if (e.key === 'Escape') { setEditing(false); setEditText(text); }
+                }}
+              />
+              <div className="flex gap-1">
+                <button onClick={() => setEditing(false)}
+                  className="text-xs px-2 py-1 rounded-lg"
+                  style={{ background: 'var(--accent)', color: '#fff' }}>✓ Lưu</button>
+                <button onClick={() => { setEditing(false); setEditText(text); }}
+                  className="text-xs px-2 py-1 rounded-lg"
+                  style={{ background: 'var(--panel)', color: 'var(--text-3)' }}>✕ Hủy</button>
+              </div>
             </div>
           )}
 
@@ -186,15 +224,27 @@ export default function MessageBubble({ message, isOwn, onReply }) {
             </div>
           )}
 
-          {/* Reply + Reaction inline buttons */}
+          {/* Reply + Reaction + Edit/Delete inline buttons */}
           <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {text && onReply && (
               <button onClick={() => onReply({ username, text })}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
                 style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
-                title="Reply">
-                ↩
-              </button>
+                title="Reply">↩</button>
+            )}
+            {/* Edit - chỉ tin nhắn của mình */}
+            {isOwn && text && (
+              <button onClick={() => setEditing(true)}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
+                title="Edit">✏️</button>
+            )}
+            {/* Delete - chỉ tin nhắn của mình */}
+            {isOwn && (
+              <button onClick={() => setDeleted(true)}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: '#ed4245' }}
+                title="Delete">🗑️</button>
             )}
             <div className="relative">
               <button onClick={() => setShowReact(v => !v)}

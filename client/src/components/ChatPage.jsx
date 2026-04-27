@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCrypto } from '../hooks/useCrypto.jsx';
 import { useSocket } from '../hooks/useSocket.jsx';
@@ -67,7 +67,11 @@ export default function ChatPage() {
   const [atBottom, setAtBottom]     = useState(true);
   const [unread, setUnread]         = useState(0);
   const [securityCode, setSecurityCode] = useState(null);
-  const [replyTo, setReplyTo]       = useState(null); // { username, text }
+  const [replyTo, setReplyTo]       = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [mentionList, setMentionList] = useState([]);
+  const [showMention, setShowMention] = useState(false);
 
   const scrollRef    = useRef(null);
   const bottomRef    = useRef(null);
@@ -121,7 +125,8 @@ export default function ChatPage() {
   }
 
   function onInput(e) {
-    setInput(e.target.value);
+    const val = e.target.value;
+    setInput(val);
     e.target.style.height = 'auto';
     e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
     if (!typingEmit.current) sendTyping(true);
@@ -129,7 +134,29 @@ export default function ChatPage() {
     typingEmit.current = setTimeout(() => { typingEmit.current = null; }, 500);
     clearTimeout(typingRef.current);
     typingRef.current = setTimeout(() => sendTyping(false), 2500);
+
+    // @mention detection
+    const atMatch = val.match(/@(\w*)$/);
+    if (atMatch) {
+      const query = atMatch[1].toLowerCase();
+      const matches = users.filter(u => u.username !== identity?.username && u.username.toLowerCase().includes(query));
+      setMentionList(matches.slice(0, 5));
+      setShowMention(matches.length > 0);
+    } else {
+      setShowMention(false);
+    }
   }
+
+  function insertMention(username) {
+    const newInput = input.replace(/@\w*$/, `@${username} `);
+    setInput(newInput);
+    setShowMention(false);
+    textareaRef.current?.focus();
+  }
+
+  const filteredMessages = searchQuery.trim()
+    ? messages.filter(m => m.text?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : messages;
 
   function onSend(e) {
     e?.preventDefault();
@@ -280,6 +307,13 @@ export default function ChatPage() {
 
           {/* Right side */}
           <div className="flex items-center gap-3 shrink-0">
+            {/* Search button */}
+            <button onClick={() => setShowSearch(v => !v)}
+              className="p-2 rounded-xl transition-all"
+              style={{ background: showSearch ? 'var(--accent-glow)' : 'var(--panel)', border: '1px solid var(--border)', color: showSearch ? 'var(--accent)' : 'var(--text-2)' }}
+              title="Search messages">
+              🔍
+            </button>
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl"
               style={{ background: 'var(--panel)', border: '1px solid var(--border)' }}>
               <span className="w-2 h-2 rounded-full" style={{ background: connected ? '#3ba55d' : '#f59e0b', boxShadow: connected ? '0 0 6px #3ba55d' : 'none' }} />
@@ -290,6 +324,32 @@ export default function ChatPage() {
             <SecurityBadge roomId={effectiveRoom} />
           </div>
         </header>
+
+        {/* Search bar */}
+        <AnimatePresence>
+          {showSearch && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+              className="px-4 py-2 flex items-center gap-2"
+              style={{ background: 'var(--panel)', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--text-3)' }}>🔍</span>
+              <input
+                autoFocus
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Tìm kiếm tin nhắn..."
+                className="flex-1 bg-transparent outline-none text-sm"
+                style={{ color: 'var(--text-1)' }}
+              />
+              {searchQuery && (
+                <span className="text-xs px-2 py-0.5 rounded-lg" style={{ background: 'var(--accent-glow)', color: 'var(--accent)' }}>
+                  {filteredMessages.length} kết quả
+                </span>
+              )}
+              <button onClick={() => { setSearchQuery(''); setShowSearch(false); }}
+                className="text-xs" style={{ color: 'var(--text-3)' }}>✕</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Banners */}
         <AnimatePresence>
@@ -321,8 +381,8 @@ export default function ChatPage() {
             </div>
           )}
           <AnimatePresence initial={false}>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} isOwn={msg.socketId === identity?.socketId} onReply={setReplyTo} />
+            {filteredMessages.map((msg) => (
+              <MessageBubble key={msg.id} message={msg} isOwn={msg.socketId === identity?.socketId} onReply={setReplyTo} highlight={searchQuery} />
             ))}
           </AnimatePresence>
           {typingUsers.size > 0 && <TypingIndicator users={[...typingUsers]} />}
@@ -369,6 +429,33 @@ export default function ChatPage() {
           </AnimatePresence>
           {showEmoji && <EmojiPicker onSelect={(e) => { setInput((p) => p + e); textareaRef.current?.focus(); }} onClose={() => setShowEmoji(false)} />}
 
+          {/* @mention popup */}
+          <AnimatePresence>
+            {showMention && (
+              <motion.div
+                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }}
+                className="absolute bottom-full left-0 right-0 mx-3 mb-1 rounded-xl overflow-hidden z-20"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', boxShadow: '0 -8px 24px rgba(0,0,0,0.2)' }}
+              >
+                {mentionList.map(u => (
+                  <button key={u.socketId} onClick={() => insertMention(u.username)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-all hover:scale-[1.01]"
+                    style={{ color: 'var(--text-1)' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--panel-hover)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-white"
+                      style={{ background: 'var(--accent)' }}>
+                      {u.username[0]?.toUpperCase()}
+                    </span>
+                    <span>@{u.username}</span>
+                    {!u.online && <span className="text-xs ml-auto" style={{ color: 'var(--text-3)' }}>offline</span>}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="flex gap-2 items-end">
             {/* Emoji btn */}
             <button type="button" onClick={() => setShowEmoji((v) => !v)}
@@ -410,6 +497,16 @@ export default function ChatPage() {
 }
 
 function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, setThemeById, onlineCount, securityCode }) {
+  const [showSettings, setShowSettings] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
+
+  function copyInviteLink() {
+    const link = `${window.location.origin}/room/${roomId}`;
+    navigator.clipboard.writeText(link);
+    setInviteCopied(true);
+    setTimeout(() => setInviteCopied(false), 2000);
+  }
+
   return (
     <>
       {/* Header */}
@@ -459,7 +556,13 @@ function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, set
 
       {/* Share */}
       {!isGlobal && (
-        <div className="p-3 shrink-0" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="p-3 shrink-0 space-y-2" style={{ borderTop: '1px solid var(--border)' }}>
+          {/* Invite link */}
+          <button onClick={copyInviteLink}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-[1.02]"
+            style={{ background: inviteCopied ? 'rgba(59,165,93,0.15)' : 'var(--panel)', border: '1px solid var(--border)', color: inviteCopied ? '#3ba55d' : 'var(--text-2)' }}>
+            {inviteCopied ? '✅ Link đã copy!' : '🔗 Copy Invite Link'}
+          </button>
           <ShareButton roomId={roomId} />
         </div>
       )}
