@@ -423,7 +423,6 @@ function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, set
             Home
           </button>
         </div>
-        </div>
 
         {/* Room badge */}
         <div className="flex items-center gap-3 p-3 rounded-2xl" style={{ background: 'var(--panel)', border: '1px solid var(--border)' }}>
