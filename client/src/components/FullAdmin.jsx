@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import ThemeSelector from './ThemeSelector.jsx';
+import { useThemeContext } from '../App.jsx';
 
 export default function FullAdmin() {
+  const { theme, setThemeById } = useThemeContext();
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -388,9 +393,9 @@ export default function FullAdmin() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen relative z-10" style={{ background: 'rgba(10,11,15,0.92)', backdropFilter: 'blur(2px)' }}>
       {/* Header */}
-      <header className="border-b" style={{ background: 'var(--panel)', borderColor: 'var(--border)' }}>
+      <header className="border-b sticky top-0 z-20" style={{ background: 'var(--panel)', borderColor: 'var(--border)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -413,6 +418,7 @@ export default function FullAdmin() {
                 Server Online
               </span>
             </div>
+            <ThemeSelector theme={theme} onSelect={setThemeById} />
             <button onClick={handleLogout} className="btn btn-soft px-4 py-2 text-sm">
               🚪 Logout
             </button>
