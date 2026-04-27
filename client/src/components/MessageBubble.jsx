@@ -197,7 +197,11 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
           {/* Reply + Reaction inline buttons */}
           <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {text && onReply && (
-              <button onClick={() => onReply({ username, text })}
+              <button onClick={() => {
+                // Extract original message content, remove any reply prefix
+                const cleanText = text.replace(/^↩\s*"[^"]*"\n/, '').trim();
+                onReply({ username, text: cleanText });
+              }}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
                 style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
                 title="Reply">↩</button>
