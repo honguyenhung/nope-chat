@@ -3,44 +3,41 @@ import { THEMES } from '../hooks/useTheme.js';
 
 export default function VideoBackground({ theme }) {
   const videoRef = useRef(null);
+
+  // Custom theme từ localStorage
+  const isCustom = theme === 'custom';
+  const customUrl = isCustom ? localStorage.getItem('custom_bg_url') : null;
+  const customType = isCustom ? localStorage.getItem('custom_bg_type') : null;
+
   const current = THEMES.find(t => t.id === theme);
 
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.load();
-    }
-  }, [theme]);
+  const videoSrc = isCustom
+    ? (customType === 'video' ? customUrl : null)
+    : current?.video;
 
-  if (!current?.video && !current?.bg) return null;
+  const imgSrc = isCustom
+    ? (customType === 'image' ? customUrl : null)
+    : current?.bg;
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.load();
+  }, [theme, videoSrc]);
+
+  if (!videoSrc && !imgSrc) return null;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-      {/* Overlay để text vẫn đọc được */}
-      <div className="absolute inset-0 z-10"
-        style={{ background: 'rgba(0,0,0,0.45)' }} />
+      <div className="absolute inset-0 z-10" style={{ background: 'rgba(0,0,0,0.45)' }} />
 
-      {/* Video background */}
-      {current.video && (
-        <video
-          ref={videoRef}
-          key={current.video}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src={current.video} type="video/webm" />
+      {videoSrc && (
+        <video ref={videoRef} key={videoSrc} autoPlay loop muted playsInline
+          className="absolute inset-0 w-full h-full object-cover">
+          <source src={videoSrc} type={videoSrc.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
         </video>
       )}
 
-      {/* Image background */}
-      {current.bg && !current.video && (
-        <img
-          src={current.bg}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+      {imgSrc && !videoSrc && (
+        <img src={imgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" />
       )}
     </div>
   );

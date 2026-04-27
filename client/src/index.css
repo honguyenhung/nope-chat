@@ -498,3 +498,34 @@
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
 }
+
+/* ═══════════════════════════════════════════════
+   CUSTOM THEME
+═══════════════════════════════════════════════ */
+[data-theme="custom"] {
+  --bg:           #0a0b0f;
+  --panel:        rgba(0,0,0,0.55);
+  --panel-hover:  rgba(0,0,0,0.7);
+  --glass:        rgba(0,0,0,0.45);
+  --glass-border: rgba(255,255,255,0.15);
+  --border:       rgba(255,255,255,0.10);
+  --text-1: #ffffff;
+  --text-2: #aaaaaa;
+  --text-3: #666666;
+  --accent:       #7c6af7;
+  --accent-2:     #5b8af5;
+  --accent-glow:  rgba(124,106,247,0.4);
+  --msg-me:       linear-gradient(135deg,#7c6af7,#5b8af5);
+  --msg-me-text:  #fff;
+  --msg-other:    rgba(0,0,0,0.5);
+  --msg-other-text: #ffffff;
+  --input-bg:     rgba(0,0,0,0.45);
+  --scrollbar:    rgba(255,255,255,0.1);
+  --sidebar-bg:   rgba(0,0,0,0.5);
+  --topbar-bg:    rgba(0,0,0,0.6);
+}
+[data-theme="custom"] .orb { display: none; }
+[data-theme="custom"] .glass {
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+}

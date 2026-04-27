@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 
 export const THEMES = [
-  { id: 'dark',       label: 'Dark',      icon: '🌙', video: null,                    bg: null },
-  { id: 'light',      label: 'Light',     icon: '☀️', video: null,                    bg: null },
-  { id: 'soft',       label: 'Soft',      icon: '🌸', video: null,                    bg: null },
-  { id: 'vibrant',    label: 'Vibrant',   icon: '🎨', video: null,                    bg: null },
-  { id: 'premium',    label: 'Premium',   icon: '💎', video: null,                    bg: null },
   { id: 'sky',        label: 'Sky',       icon: '☁️', video: null,                    bg: '/themes/background.jpg' },
   { id: 'darkblue',   label: 'Dark Blue', icon: '🌃', video: '/themes/darkblue.webm', bg: null },
   { id: 'dracula',    label: 'Dracula',   icon: '🧛', video: '/themes/dracula.webm',  bg: null },
@@ -15,7 +10,7 @@ export const THEMES = [
 ];
 
 export function useTheme() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'sky');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
