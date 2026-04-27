@@ -30,15 +30,17 @@ export default function VideoBackground({ theme }) {
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-      <div className="absolute inset-0 z-10" style={{ background: 'rgba(0,0,0,0.55)' }} />
+      <div className="absolute inset-0 z-10" style={{ background: 'rgba(0,0,0,0.25)' }} />
       {videoSrc && (
         <video ref={videoRef} key={videoSrc} autoPlay loop muted playsInline
-          className="absolute inset-0 w-full h-full object-cover">
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(1.2) contrast(1.1)' }}>
           <source src={videoSrc} />
         </video>
       )}
       {imgSrc && !videoSrc && (
-        <img src={imgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={imgSrc} alt="" className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'brightness(1.2) contrast(1.1)' }} />
       )}
     </div>
   );
