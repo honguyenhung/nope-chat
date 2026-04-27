@@ -198,8 +198,12 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
           <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
             {text && onReply && (
               <button onClick={() => {
-                // Extract original message content, remove any reply prefix
-                const cleanText = text.replace(/^↩\s*"[^"]*"\n/, '').trim();
+                // Extract original message content, remove any reply prefix (with or without username)
+                // Matches: ↩ "text" OR ↩ username: "text"
+                const cleanText = text
+                  .replace(/^↩\s*"[^"]*"\n/, '') // Remove ↩ "quoted text"
+                  .replace(/^↩\s+[^:]+:\s*"[^"]*"\n/, '') // Remove ↩ username: "quoted text"
+                  .trim();
                 onReply({ username, text: cleanText });
               }}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"

@@ -32,7 +32,7 @@ export default function ShareButton({ roomId }) {
         <AnimatePresence mode="wait">
           {copied
             ? <motion.span key="ok" initial={{ scale: 0.7 }} animate={{ scale: 1 }} className="flex items-center gap-2">✅ Copied!</motion.span>
-            : <motion.span key="cp" initial={{ scale: 0.7 }} animate={{ scale: 1 }} className="flex items-center gap-2">🔗 Share Room Link</motion.span>
+            : <motion.span key="cp" initial={{ scale: 0.7 }} animate={{ scale: 1 }} className="flex items-center gap-2">🔗 Copy Link</motion.span>
           }
         </AnimatePresence>
       </button>
