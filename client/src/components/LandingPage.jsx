@@ -34,8 +34,6 @@ function DiscordButton() {
   );
 }
 
-const WORDS = ['Ghost','Shadow','Phantom','Cipher','Void','Neon','Stealth','Raven','Lynx','Viper'];
-
 export default function LandingPage() {
   const navigate = useNavigate();
   const { socket, identity, connected, nickname, applyNickname } = useSocket();
