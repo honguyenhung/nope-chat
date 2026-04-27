@@ -42,7 +42,7 @@ export default function ChatPage() {
     });
   }, [socket, effectiveRoom, isGlobal]);
 
-  const { messages, users, typingUsers, joinError, sendMessage, sendTyping, editMessage, deleteMessage } = useChat(
+  const { messages, users, typingUsers, joinError, sendMessage, sendTyping } = useChat(
     effectiveRoom,
     password || null
   );
@@ -162,7 +162,7 @@ export default function ChatPage() {
     e?.preventDefault();
     if (!input.trim()) return;
     
-    const finalText = replyTo ? `↩ ${replyTo.username}: "${replyTo.text?.slice(0,40)}${replyTo.text?.length > 40 ? '…' : ''}"\n${input}` : input;
+    const finalText = replyTo ? `↩ "${replyTo.text?.slice(0,40)}${replyTo.text?.length > 40 ? '…' : ''}"\n${input}` : input;
     
     // Clear reply state immediately before sending
     setReplyTo(null);
@@ -391,8 +391,6 @@ export default function ChatPage() {
                 message={msg} 
                 isOwn={msg.socketId === identity?.socketId} 
                 onReply={setReplyTo} 
-                onEdit={editMessage}
-                onDelete={deleteMessage}
                 highlight={searchQuery} 
               />
             ))}
