@@ -161,10 +161,14 @@ export default function ChatPage() {
   function onSend(e) {
     e?.preventDefault();
     if (!input.trim()) return;
+    
     const finalText = replyTo ? `↩ ${replyTo.username}: "${replyTo.text?.slice(0,40)}${replyTo.text?.length > 40 ? '…' : ''}"\n${input}` : input;
-    sendMessage(finalText);
-    setInput('');
+    
+    // Clear reply state immediately before sending
     setReplyTo(null);
+    setInput('');
+    
+    sendMessage(finalText);
     sendTyping(false);
     clearTimeout(typingRef.current); clearTimeout(typingEmit.current); typingEmit.current = null;
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -418,7 +422,11 @@ export default function ChatPage() {
         <div className="p-3 shrink-0 relative"
           style={{ background: 'var(--topbar-bg)', borderTop: '1px solid var(--border)', backdropFilter: 'blur(20px)' }}>
           <AnimatePresence>
-            {pendingImg && <ImagePreview src={pendingImg} onSend={() => { sendMessage('', pendingImg); setPendingImg(null); }} onCancel={() => setPendingImg(null)} />}
+            {pendingImg && <ImagePreview src={pendingImg} onSend={() => { 
+              setReplyTo(null); // Clear reply when sending image
+              sendMessage('', pendingImg); 
+              setPendingImg(null); 
+            }} onCancel={() => setPendingImg(null)} />}
           </AnimatePresence>
           {/* Reply preview */}
           <AnimatePresence>

@@ -103,6 +103,7 @@ export function useChat(roomId, password = null) {
 
     // Handle message edited
     socket.on('message_edited', async (editedMsg) => {
+      console.log('Received message_edited:', editedMsg);
       const decrypted = await decryptMsg(editedMsg, roomIdRef.current);
       setMessages((prev) => 
         prev.map(msg => 
@@ -115,6 +116,7 @@ export function useChat(roomId, password = null) {
 
     // Handle message deleted
     socket.on('message_deleted', ({ messageId }) => {
+      console.log('Received message_deleted:', messageId);
       setMessages((prev) => prev.filter(msg => msg.id !== messageId));
     });
 
@@ -152,7 +154,7 @@ export function useChat(roomId, password = null) {
     });
 
     return () => {
-      ['message_history','new_message','admin_message','room_messages_cleared','room_users','user_joined',
+      ['message_history','new_message','admin_message','room_messages_cleared','message_edited','message_deleted','room_users','user_joined',
        'user_left','user_typing','user_stop_typing','join_error'].forEach((e) => socket.off(e));
       Object.values(typingTimers.current).forEach(clearTimeout);
       typingTimers.current = {};
@@ -262,12 +264,14 @@ export function useChat(roomId, password = null) {
 
   const editMessage = useCallback(
     async (messageId, newText) => {
+      console.log('editMessage called:', { messageId, newText, connected: socket?.connected });
       if (!socket?.connected || !newText?.trim()) return;
 
       try {
         const ctx = { roomId };
         const { ciphertext, iv } = await encrypt(newText.trim(), ctx);
         
+        console.log('Sending edit_message:', { roomId, messageId, encrypted: !!ciphertext });
         socket.emit('edit_message', {
           roomId,
           messageId,
@@ -285,8 +289,10 @@ export function useChat(roomId, password = null) {
 
   const deleteMessage = useCallback(
     (messageId) => {
+      console.log('deleteMessage called:', { messageId, connected: socket?.connected });
       if (!socket?.connected) return;
       
+      console.log('Sending delete_message:', { roomId, messageId });
       socket.emit('delete_message', {
         roomId,
         messageId

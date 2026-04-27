@@ -82,17 +82,22 @@ export default function MessageBubble({ message, isOwn, onReply, onEdit, onDelet
 
   function handleSaveEdit() {
     if (editText.trim() && editText.trim() !== text && onEdit) {
+      console.log('Saving edit:', { id, newText: editText.trim() });
       onEdit(id, editText.trim());
+    } else {
+      console.log('Edit cancelled - no changes or missing onEdit function');
     }
     setEditing(false);
   }
 
   function handleCancelEdit() {
+    console.log('Edit cancelled');
     setEditing(false);
     setEditText(text || '');
   }
 
   function handleDelete() {
+    console.log('Delete clicked:', { id, onDelete: !!onDelete });
     if (onDelete && confirm('Xóa tin nhắn này?')) {
       onDelete(id);
     }

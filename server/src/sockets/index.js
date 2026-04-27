@@ -224,6 +224,8 @@ export function registerSocketHandlers(io) {
 
     // --- Edit message ---
     socket.on('edit_message', ({ roomId, messageId, encryptedContent, iv }) => {
+      console.log('Received edit_message:', { roomId, messageId, socketId: socket.id });
+      
       if (!checkSocketRateLimit(socket.id)) {
         recordViolation(ip, 'message_spam');
         socket.emit('error', { message: 'Slow down! You are editing messages too fast.' });
@@ -234,10 +236,12 @@ export function registerSocketHandlers(io) {
 
       // Validate payload
       if (!encryptedContent || !b64Regex.test(encryptedContent) || encryptedContent.length > 20_000) {
+        console.log('Invalid encrypted content');
         socket.emit('error', { message: 'Invalid message format.' });
         return;
       }
       if (!iv || !b64Regex.test(iv)) {
+        console.log('Invalid IV');
         socket.emit('error', { message: 'Invalid message format.' });
         return;
       }
@@ -249,6 +253,7 @@ export function registerSocketHandlers(io) {
       const messageIndex = roomMessages.findIndex(msg => msg.id === messageId && msg.socketId === socket.id);
       
       if (messageIndex === -1) {
+        console.log('Message not found or not owned by user');
         socket.emit('error', { message: 'Message not found or not yours to edit.' });
         return;
       }
@@ -263,6 +268,7 @@ export function registerSocketHandlers(io) {
       };
 
       roomMessages[messageIndex] = updatedMessage;
+      console.log('Message updated, broadcasting to room:', targetRoom);
 
       // Broadcast updated message to room
       io.to(targetRoom).emit('message_edited', updatedMessage);
@@ -270,6 +276,8 @@ export function registerSocketHandlers(io) {
 
     // --- Delete message ---
     socket.on('delete_message', ({ roomId, messageId }) => {
+      console.log('Received delete_message:', { roomId, messageId, socketId: socket.id });
+      
       if (!checkEventRateLimit(socket.id, 'delete', 30)) { // 30 deletes per minute
         recordViolation(ip, 'delete_spam');
         socket.emit('error', { message: 'Slow down! You are deleting messages too fast.' });
@@ -283,12 +291,14 @@ export function registerSocketHandlers(io) {
       const messageIndex = roomMessages.findIndex(msg => msg.id === messageId && msg.socketId === socket.id);
       
       if (messageIndex === -1) {
+        console.log('Message not found or not owned by user');
         socket.emit('error', { message: 'Message not found or not yours to delete.' });
         return;
       }
 
       // Remove message
       roomMessages.splice(messageIndex, 1);
+      console.log('Message deleted, broadcasting to room:', targetRoom);
 
       // Broadcast deletion to room
       io.to(targetRoom).emit('message_deleted', { messageId, roomId: targetRoom });
