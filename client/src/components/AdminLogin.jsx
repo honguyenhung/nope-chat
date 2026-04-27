@@ -50,25 +50,6 @@ export default function AdminLogin({ onLogin }) {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative" style={{ background: 'var(--bg)' }}>
       <VideoBackground theme={theme} />
-      
-      {/* Back to Home Button */}
-      <motion.button
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.2 }}
-        onClick={() => window.location.href = '/'}
-        className="fixed top-6 left-6 z-30 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:scale-105"
-        style={{ 
-          background: 'var(--glass)', 
-          border: '1px solid var(--glass-border)', 
-          color: 'var(--text-2)',
-          backdropFilter: 'blur(12px)'
-        }}
-      >
-        <span>←</span>
-        <span className="hidden sm:inline">Quay lại</span>
-      </motion.button>
-      
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       

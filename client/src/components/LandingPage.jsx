@@ -304,56 +304,6 @@ export default function LandingPage() {
             </div>
           ))}
         </motion.div>
-
-        {/* ── Admin Access ── */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-          className="text-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/admin')}
-            className="group relative overflow-hidden px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300"
-            style={{
-              background: 'linear-gradient(135deg, #dc2626, #ef4444, #f97316)',
-              color: '#fff',
-              boxShadow: '0 8px 32px rgba(220, 38, 38, 0.4)',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
-            }}
-          >
-            {/* Animated background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            
-            {/* Content */}
-            <div className="relative flex items-center gap-2">
-              <span className="text-lg">👑</span>
-              <span>Admin Panel</span>
-              <motion.span
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className="text-lg"
-              >
-                ⚡
-              </motion.span>
-            </div>
-            
-            {/* Glow effect */}
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ boxShadow: '0 0 30px rgba(220, 38, 38, 0.6)' }} />
-          </motion.button>
-          
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-[10px] font-mono mt-2 opacity-40"
-            style={{ color: 'var(--text-3)' }}
-          >
-            🔐 Restricted Access • Authorized Personnel Only
-          </motion.p>
-        </motion.div>
       </div>
 
       {/* ── Floating Contact Button ── */}
