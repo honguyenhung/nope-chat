@@ -19,25 +19,32 @@ export default function VideoBackground({ theme }) {
     ? (customType === 'image' ? customUrl : null)
     : current?.bg;
 
+  // Detect type từ base64 hoặc URL
+  const isVideo = videoSrc || (isCustom && customUrl?.startsWith('data:video'));
+  const isImg = !isVideo && (imgSrc || (isCustom && customUrl?.startsWith('data:image')));
+
+  const finalVideoSrc = isVideo ? (videoSrc || customUrl) : null;
+  const finalImgSrc = isImg ? (imgSrc || customUrl) : null;
+
   useEffect(() => {
     if (videoRef.current) videoRef.current.load();
   }, [theme, videoSrc]);
 
-  if (!videoSrc && !imgSrc) return null;
+  if (!finalVideoSrc && !finalImgSrc) return null;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       <div className="absolute inset-0 z-10" style={{ background: 'rgba(0,0,0,0.45)' }} />
 
-      {videoSrc && (
-        <video ref={videoRef} key={videoSrc} autoPlay loop muted playsInline
+      {finalVideoSrc && (
+        <video ref={videoRef} key={finalVideoSrc} autoPlay loop muted playsInline
           className="absolute inset-0 w-full h-full object-cover">
-          <source src={videoSrc} type={videoSrc.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+          <source src={finalVideoSrc} />
         </video>
       )}
 
-      {imgSrc && !videoSrc && (
-        <img src={imgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      {finalImgSrc && !finalVideoSrc && (
+        <img src={finalImgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" />
       )}
     </div>
   );

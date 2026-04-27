@@ -118,18 +118,41 @@ export default function ThemeSelector({ theme, onSelect }) {
                     ))}
                   </div>
 
-                  <input
-                    type="text"
-                    value={customUrl}
-                    onChange={e => setCustomUrl(e.target.value)}
-                    placeholder={customType === 'image' ? 'https://... (.jpg/.png)' : 'https://... (.mp4/.webm)'}
-                    className="field text-xs"
-                    onKeyDown={e => e.key === 'Enter' && applyCustom()}
-                  />
+                  {/* Upload file */}
+                  <label className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl cursor-pointer transition-all hover:scale-[1.02]"
+                    style={{ background: 'var(--panel-hover)', border: '2px dashed var(--border)' }}>
+                    <span className="text-2xl">{customType === 'image' ? '🖼️' : '🎬'}</span>
+                    <span className="text-xs font-semibold" style={{ color: 'var(--text-2)' }}>
+                      Bấm để chọn {customType === 'image' ? 'ảnh' : 'video'}
+                    </span>
+                    <span className="text-[10px]" style={{ color: 'var(--text-3)' }}>
+                      {customType === 'image' ? 'JPG, PNG, GIF, WebP' : 'MP4, WebM'}
+                    </span>
+                    <input
+                      type="file"
+                      accept={customType === 'image' ? 'image/*' : 'video/*'}
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = ev => setCustomUrl(ev.target.result);
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </label>
 
-                  <p className="text-[10px]" style={{ color: 'var(--text-3)' }}>
-                    Dán link ảnh hoặc video từ internet
-                  </p>
+                  {customUrl && (
+                    <div className="flex items-center gap-2 p-2 rounded-xl"
+                      style={{ background: 'rgba(59,165,93,0.1)', border: '1px solid rgba(59,165,93,0.3)' }}>
+                      <span className="text-green-400 text-sm">✓</span>
+                      <span className="text-xs truncate flex-1" style={{ color: '#3ba55d' }}>
+                        File đã chọn
+                      </span>
+                      <button onClick={() => setCustomUrl('')}
+                        className="text-xs" style={{ color: 'var(--text-3)' }}>✕</button>
+                    </div>
+                  )}
 
                   <div className="flex gap-2">
                     <button onClick={applyCustom} disabled={!customUrl.trim()}
