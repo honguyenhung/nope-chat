@@ -53,9 +53,9 @@ export default function WelcomeGuide() {
             {/* Header */}
             <div className="p-6 pb-4 text-center"
               style={{ borderBottom: '1px solid var(--border)' }}>
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-3"
-                style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', boxShadow: '0 8px 32px var(--accent-glow)' }}>
-                👻
+              <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-3"
+                style={{ boxShadow: '0 8px 32px var(--accent-glow)' }}>
+                <img src="/avatar.png" alt="Nope" className="w-full h-full object-cover" />
               </div>
               <h2 className="text-xl font-extrabold mb-1" style={{ color: 'var(--text-1)' }}>
                 Chào mừng đến với <span className="grad-text">Nope Privacy</span>
