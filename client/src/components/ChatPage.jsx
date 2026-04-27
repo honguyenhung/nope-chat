@@ -435,7 +435,6 @@ export default function ChatPage() {
                 style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderLeft: '3px solid var(--accent)' }}
               >
                 <span>↩</span>
-                <span className="font-bold" style={{ color: 'var(--accent)' }}>{replyTo.username}</span>
                 <span className="truncate flex-1" style={{ color: 'var(--text-3)' }}>{replyTo.text?.slice(0, 60)}</span>
                 <button onClick={() => setReplyTo(null)} className="shrink-0" style={{ color: 'var(--text-3)' }}>✕</button>
               </motion.div>
