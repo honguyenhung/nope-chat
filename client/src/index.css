@@ -228,3 +228,16 @@
   from { transform: translate(0, 0) scale(1); }
   to   { transform: translate(30px, 20px) scale(1.08); }
 }
+
+/* ═══════════════════════════════════════════════
+   NEW MESSAGE GLOW ANIMATION
+═══════════════════════════════════════════════ */
+@keyframes newMsgGlow {
+  0%   { background: rgba(124,106,247,0.08); }
+  50%  { background: rgba(124,106,247,0.04); }
+  100% { background: transparent; }
+}
+
+.msg-new {
+  animation: newMsgGlow 2s ease forwards;
+}

@@ -66,6 +66,7 @@ export default function ChatPage() {
   const [atBottom, setAtBottom]     = useState(true);
   const [unread, setUnread]         = useState(0);
   const [securityCode, setSecurityCode] = useState(null);
+  const [replyTo, setReplyTo]       = useState(null); // { username, text }
 
   const scrollRef    = useRef(null);
   const bottomRef    = useRef(null);
@@ -132,7 +133,11 @@ export default function ChatPage() {
   function onSend(e) {
     e?.preventDefault();
     if (!input.trim()) return;
-    sendMessage(input); setInput(''); sendTyping(false);
+    const finalText = replyTo ? `↩ ${replyTo.username}: "${replyTo.text?.slice(0,40)}${replyTo.text?.length > 40 ? '…' : ''}"\n${input}` : input;
+    sendMessage(finalText);
+    setInput('');
+    setReplyTo(null);
+    sendTyping(false);
     clearTimeout(typingRef.current); clearTimeout(typingEmit.current); typingEmit.current = null;
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   }
@@ -317,7 +322,7 @@ export default function ChatPage() {
           )}
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} isOwn={msg.socketId === identity?.socketId} />
+              <MessageBubble key={msg.id} message={msg} isOwn={msg.socketId === identity?.socketId} onReply={setReplyTo} />
             ))}
           </AnimatePresence>
           {typingUsers.size > 0 && <TypingIndicator users={[...typingUsers]} />}
@@ -346,6 +351,21 @@ export default function ChatPage() {
           style={{ background: 'var(--topbar-bg)', borderTop: '1px solid var(--border)', backdropFilter: 'blur(20px)' }}>
           <AnimatePresence>
             {pendingImg && <ImagePreview src={pendingImg} onSend={() => { sendMessage('', pendingImg); setPendingImg(null); }} onCancel={() => setPendingImg(null)} />}
+          </AnimatePresence>
+          {/* Reply preview */}
+          <AnimatePresence>
+            {replyTo && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 6 }}
+                className="flex items-center gap-2 mb-2 px-3 py-2 rounded-xl text-xs"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderLeft: '3px solid var(--accent)' }}
+              >
+                <span>↩</span>
+                <span className="font-bold" style={{ color: 'var(--accent)' }}>{replyTo.username}</span>
+                <span className="truncate flex-1" style={{ color: 'var(--text-3)' }}>{replyTo.text?.slice(0, 60)}</span>
+                <button onClick={() => setReplyTo(null)} className="shrink-0" style={{ color: 'var(--text-3)' }}>✕</button>
+              </motion.div>
+            )}
           </AnimatePresence>
           {showEmoji && <EmojiPicker onSelect={(e) => { setInput((p) => p + e); textareaRef.current?.focus(); }} onClose={() => setShowEmoji(false)} />}
 
