@@ -52,8 +52,8 @@ function Lightbox({ src, onClose }) {
   );
 }
 
-export default function MessageBubble({ message, isOwn, onReply, highlight }) {
-  const { id, username, text, imageData, timestamp, optimistic, isAdmin } = message;
+export default function MessageBubble({ message, isOwn, onReply, onEdit, onDelete, highlight }) {
+  const { id, username, text, imageData, timestamp, optimistic, isAdmin, isEdited } = message;
   const [lightbox, setLightbox]     = useState(false);
   const [copied, setCopied]         = useState(false);
   const [reactions, setReactions]   = useState({});
@@ -78,6 +78,24 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
   function addReaction(emoji) {
     setReactions(prev => ({ ...prev, [emoji]: (prev[emoji] || 0) + 1 }));
     setShowReact(false);
+  }
+
+  function handleSaveEdit() {
+    if (editText.trim() && editText.trim() !== text && onEdit) {
+      onEdit(id, editText.trim());
+    }
+    setEditing(false);
+  }
+
+  function handleCancelEdit() {
+    setEditing(false);
+    setEditText(text || '');
+  }
+
+  function handleDelete() {
+    if (onDelete && confirm('Xóa tin nhắn này?')) {
+      onDelete(id);
+    }
   }
 
   // Highlight search text
@@ -176,6 +194,9 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
           {text && !editing && (
             <div className={`px-4 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap ${isOwn ? 'bubble-me' : 'bubble-them'}`}>
               {highlightText(text, highlight)}
+              {isEdited && (
+                <span className="text-[10px] opacity-60 ml-2">(đã chỉnh sửa)</span>
+              )}
             </div>
           )}
 
@@ -189,15 +210,20 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
                 rows={2}
                 autoFocus
                 onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); setEditing(false); }
-                  if (e.key === 'Escape') { setEditing(false); setEditText(text); }
+                  if (e.key === 'Enter' && !e.shiftKey) { 
+                    e.preventDefault(); 
+                    handleSaveEdit();
+                  }
+                  if (e.key === 'Escape') { 
+                    handleCancelEdit();
+                  }
                 }}
               />
               <div className="flex gap-1">
-                <button onClick={() => setEditing(false)}
+                <button onClick={handleSaveEdit}
                   className="text-xs px-2 py-1 rounded-lg"
                   style={{ background: 'var(--accent)', color: '#fff' }}>✓ Lưu</button>
-                <button onClick={() => { setEditing(false); setEditText(text); }}
+                <button onClick={handleCancelEdit}
                   className="text-xs px-2 py-1 rounded-lg"
                   style={{ background: 'var(--panel)', color: 'var(--text-3)' }}>✕ Hủy</button>
               </div>
@@ -241,7 +267,7 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
             )}
             {/* Delete - chỉ tin nhắn của mình */}
             {isOwn && (
-              <button onClick={() => setDeleted(true)}
+              <button onClick={handleDelete}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
                 style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: '#ed4245' }}
                 title="Delete">🗑️</button>

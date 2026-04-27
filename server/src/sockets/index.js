@@ -222,6 +222,78 @@ export function registerSocketHandlers(io) {
       socket.to(roomId || 'global').emit('user_stop_typing', { socketId: socket.id });
     });
 
+    // --- Edit message ---
+    socket.on('edit_message', ({ roomId, messageId, encryptedContent, iv }) => {
+      if (!checkSocketRateLimit(socket.id)) {
+        recordViolation(ip, 'message_spam');
+        socket.emit('error', { message: 'Slow down! You are editing messages too fast.' });
+        return;
+      }
+
+      const b64Regex = /^[A-Za-z0-9+/=]+$/;
+
+      // Validate payload
+      if (!encryptedContent || !b64Regex.test(encryptedContent) || encryptedContent.length > 20_000) {
+        socket.emit('error', { message: 'Invalid message format.' });
+        return;
+      }
+      if (!iv || !b64Regex.test(iv)) {
+        socket.emit('error', { message: 'Invalid message format.' });
+        return;
+      }
+
+      const targetRoom = roomId || 'global';
+      
+      // Find message in room store
+      const roomMessages = global.roomMessages?.[targetRoom] || [];
+      const messageIndex = roomMessages.findIndex(msg => msg.id === messageId && msg.socketId === socket.id);
+      
+      if (messageIndex === -1) {
+        socket.emit('error', { message: 'Message not found or not yours to edit.' });
+        return;
+      }
+
+      // Update message
+      const updatedMessage = {
+        ...roomMessages[messageIndex],
+        encryptedContent,
+        iv,
+        editedAt: Date.now(),
+        isEdited: true
+      };
+
+      roomMessages[messageIndex] = updatedMessage;
+
+      // Broadcast updated message to room
+      io.to(targetRoom).emit('message_edited', updatedMessage);
+    });
+
+    // --- Delete message ---
+    socket.on('delete_message', ({ roomId, messageId }) => {
+      if (!checkEventRateLimit(socket.id, 'delete', 30)) { // 30 deletes per minute
+        recordViolation(ip, 'delete_spam');
+        socket.emit('error', { message: 'Slow down! You are deleting messages too fast.' });
+        return;
+      }
+
+      const targetRoom = roomId || 'global';
+      
+      // Find and remove message from room store
+      const roomMessages = global.roomMessages?.[targetRoom] || [];
+      const messageIndex = roomMessages.findIndex(msg => msg.id === messageId && msg.socketId === socket.id);
+      
+      if (messageIndex === -1) {
+        socket.emit('error', { message: 'Message not found or not yours to delete.' });
+        return;
+      }
+
+      // Remove message
+      roomMessages.splice(messageIndex, 1);
+
+      // Broadcast deletion to room
+      io.to(targetRoom).emit('message_deleted', { messageId, roomId: targetRoom });
+    });
+
     // --- Disconnect: mark offline, keep in list for 60s ---
     socket.on('disconnect', () => {
       // Log disconnect

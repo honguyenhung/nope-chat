@@ -101,6 +101,23 @@ export function useChat(roomId, password = null) {
       setMessages([clearNotification]);
     });
 
+    // Handle message edited
+    socket.on('message_edited', async (editedMsg) => {
+      const decrypted = await decryptMsg(editedMsg, roomIdRef.current);
+      setMessages((prev) => 
+        prev.map(msg => 
+          msg.id === editedMsg.id 
+            ? { ...decrypted, isEdited: true }
+            : msg
+        )
+      );
+    });
+
+    // Handle message deleted
+    socket.on('message_deleted', ({ messageId }) => {
+      setMessages((prev) => prev.filter(msg => msg.id !== messageId));
+    });
+
     socket.on('room_users', ({ users }) => setUsers(users));
 
     socket.on('user_joined', ({ socketId, publicKey }) => {
@@ -241,5 +258,42 @@ export function useChat(roomId, password = null) {
     [socket, roomId]
   );
 
-  return { messages, users, typingUsers, joinError, sendMessage, sendTyping };
+  // ── Edit message ─────────────────────────────────────────
+
+  const editMessage = useCallback(
+    async (messageId, newText) => {
+      if (!socket?.connected || !newText?.trim()) return;
+
+      try {
+        const ctx = { roomId };
+        const { ciphertext, iv } = await encrypt(newText.trim(), ctx);
+        
+        socket.emit('edit_message', {
+          roomId,
+          messageId,
+          encryptedContent: ciphertext,
+          iv
+        });
+      } catch (err) {
+        console.error('Failed to edit message:', err);
+      }
+    },
+    [socket, roomId, encrypt]
+  );
+
+  // ── Delete message ───────────────────────────────────────
+
+  const deleteMessage = useCallback(
+    (messageId) => {
+      if (!socket?.connected) return;
+      
+      socket.emit('delete_message', {
+        roomId,
+        messageId
+      });
+    },
+    [socket, roomId]
+  );
+
+  return { messages, users, typingUsers, joinError, sendMessage, sendTyping, editMessage, deleteMessage };
 }

@@ -42,7 +42,7 @@ export default function ChatPage() {
     });
   }, [socket, effectiveRoom, isGlobal]);
 
-  const { messages, users, typingUsers, joinError, sendMessage, sendTyping } = useChat(
+  const { messages, users, typingUsers, joinError, sendMessage, sendTyping, editMessage, deleteMessage } = useChat(
     effectiveRoom,
     password || null
   );
@@ -382,7 +382,15 @@ export default function ChatPage() {
           )}
           <AnimatePresence initial={false}>
             {filteredMessages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} isOwn={msg.socketId === identity?.socketId} onReply={setReplyTo} highlight={searchQuery} />
+              <MessageBubble 
+                key={msg.id} 
+                message={msg} 
+                isOwn={msg.socketId === identity?.socketId} 
+                onReply={setReplyTo} 
+                onEdit={editMessage}
+                onDelete={deleteMessage}
+                highlight={searchQuery} 
+              />
             ))}
           </AnimatePresence>
           {typingUsers.size > 0 && <TypingIndicator users={[...typingUsers]} />}
@@ -498,14 +506,6 @@ export default function ChatPage() {
 
 function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, setThemeById, onlineCount, securityCode }) {
   const [showSettings, setShowSettings] = useState(false);
-  const [inviteCopied, setInviteCopied] = useState(false);
-
-  function copyInviteLink() {
-    const link = `${window.location.origin}/room/${roomId}`;
-    navigator.clipboard.writeText(link);
-    setInviteCopied(true);
-    setTimeout(() => setInviteCopied(false), 2000);
-  }
 
   return (
     <>
@@ -556,13 +556,7 @@ function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, set
 
       {/* Share */}
       {!isGlobal && (
-        <div className="p-3 shrink-0 space-y-2" style={{ borderTop: '1px solid var(--border)' }}>
-          {/* Invite link */}
-          <button onClick={copyInviteLink}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-[1.02]"
-            style={{ background: inviteCopied ? 'rgba(59,165,93,0.15)' : 'var(--panel)', border: '1px solid var(--border)', color: inviteCopied ? '#3ba55d' : 'var(--text-2)' }}>
-            {inviteCopied ? '✅ Link đã copy!' : '🔗 Copy Invite Link'}
-          </button>
+        <div className="p-3 shrink-0" style={{ borderTop: '1px solid var(--border)' }}>
           <ShareButton roomId={roomId} />
         </div>
       )}
