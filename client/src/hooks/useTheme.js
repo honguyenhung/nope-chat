@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 
 export const THEMES = [
-  { id: 'sky',        label: 'Sky',       icon: '☁️', video: null,                    bg: '/themes/background.jpg' },
   { id: 'darkblue',   label: 'Dark Blue', icon: '🌃', video: '/themes/darkblue.webm', bg: null },
   { id: 'dracula',    label: 'Dracula',   icon: '🧛', video: '/themes/dracula.webm',  bg: null },
   { id: 'monokai',    label: 'Monokai',   icon: '🌿', video: '/themes/monokai.webm',  bg: null },
   { id: 'nord',       label: 'Nord',      icon: '❄️', video: '/themes/nord.webm',     bg: null },
-  { id: 'pink',       label: 'Pink',      icon: '🌷', video: '/themes/pink.webm',     bg: null },
 ];
 
 export function useTheme() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'pink');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'darkblue');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
