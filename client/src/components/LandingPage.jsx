@@ -74,7 +74,7 @@ export default function LandingPage() {
   const displayName = identity?.username ?? nickInput;
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 pb-safe overflow-hidden">
       {/* Ambient orbs */}
       <div className="orb orb-1" />
       <div className="orb orb-2" />
@@ -307,7 +307,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── Floating Contact Button ── */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 bottom-safe right-6 z-50 flex flex-col items-end gap-2">
         {/* Contact popup */}
         <AnimatePresence>
           {showContact && (

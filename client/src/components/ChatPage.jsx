@@ -596,8 +596,12 @@ export default function ChatPage() {
             <motion.button
               initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.6 }}
               onClick={() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); setUnread(0); }}
-              className="absolute bottom-24 right-5 w-11 h-11 rounded-full flex items-center justify-center z-10 font-bold text-white"
-              style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', boxShadow: '0 4px 20px var(--accent-glow)' }}
+              className="absolute right-5 z-10 w-11 h-11 rounded-full flex items-center justify-center font-bold text-white"
+              style={{ 
+                bottom: 'calc(6rem + env(safe-area-inset-bottom))',
+                background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', 
+                boxShadow: '0 4px 20px var(--accent-glow)' 
+              }}
             >
               {unread > 0
                 ? <span className="text-xs">{unread > 99 ? '99+' : unread}</span>
@@ -608,7 +612,7 @@ export default function ChatPage() {
         </AnimatePresence>
 
         {/* Input bar */}
-        <div className="p-3 shrink-0 relative"
+        <div className="p-3 pb-safe shrink-0 relative"
           style={{ background: 'var(--topbar-bg)', borderTop: '1px solid var(--border)', backdropFilter: 'blur(20px)' }}>
           <AnimatePresence>
             {pendingImg && <ImagePreview src={pendingImg} onSend={() => { 

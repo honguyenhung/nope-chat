@@ -8,6 +8,7 @@ import ChatPage from './components/ChatPage.jsx';
 import FullAdmin from './components/FullAdmin.jsx';
 import WelcomeGuide from './components/WelcomeGuide.jsx';
 import VideoBackground from './components/VideoBackground.jsx';
+import InstallPrompt from './components/InstallPrompt.jsx';
 
 export const ThemeContext = createContext({ theme: 'dark', toggle: () => {}, setThemeById: () => {} });
 export const useThemeContext = () => useContext(ThemeContext);
@@ -21,6 +22,7 @@ export default function App() {
         <SocketProvider>
           <VideoBackground theme={theme} />
           <WelcomeGuide />
+          <InstallPrompt />
           <Routes>
             <Route path="/"            element={<LandingPage />} />
             <Route path="/room/:roomId" element={<ChatPage />} />

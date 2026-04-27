@@ -1,18 +1,56 @@
 {
-  "name": "Nope",
+  "name": "Nope - Anonymous Chat",
   "short_name": "Nope",
-  "description": "Anonymous real-time chat. No account. No trace.",
+  "description": "Anonymous real-time chat. E2E encrypted. No account. No trace.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0b0f",
   "theme_color": "#7c6af7",
   "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["social", "communication"],
+  "lang": "vi-VN",
+  "dir": "ltr",
   "icons": [
+    {
+      "src": "/avatar.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/avatar.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/ghost.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/preview.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Global Room",
+      "short_name": "Global",
+      "description": "Join the global public chat room",
+      "url": "/global",
+      "icons": [
+        {
+          "src": "/ghost.svg",
+          "sizes": "96x96"
+        }
+      ]
     }
   ]
 }
