@@ -500,6 +500,19 @@
 }
 
 /* ═══════════════════════════════════════════════
+   ADMIN PANEL OVERRIDES - Brighter theme
+═══════════════════════════════════════════════ */
+.admin-panel {
+  --panel: rgba(255,255,255,0.08) !important;
+  --panel-hover: rgba(255,255,255,0.12) !important;
+  --glass: rgba(255,255,255,0.09) !important;
+  --input-bg: rgba(255,255,255,0.10) !important;
+  --text-1: #ffffff !important;
+  --text-2: #b0b8d0 !important;
+  --text-3: #6a7288 !important;
+}
+
+/* ═══════════════════════════════════════════════
    CUSTOM THEME
 ═══════════════════════════════════════════════ */
 [data-theme="custom"] {
