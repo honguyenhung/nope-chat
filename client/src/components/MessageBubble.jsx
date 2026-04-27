@@ -185,47 +185,47 @@ export default function MessageBubble({ message, isOwn, onReply }) {
               ))}
             </div>
           )}
-        </div>
 
-        {/* Reaction + Reply buttons — shows on hover */}
-        <div className={`absolute bottom-2 ${isOwn ? 'left-12' : 'right-2'} opacity-0 group-hover:opacity-100 transition-opacity flex gap-1`}>
-          {/* Reply button */}
-          {text && onReply && (
-            <button onClick={() => onReply({ username, text })}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all hover:scale-110"
-              style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
-              title="Reply">
-              ↩
-            </button>
-          )}
-          {/* Reaction button */}
-          <div className="relative">
-            <button onClick={() => setShowReact(v => !v)}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all hover:scale-110"
-              style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}>
-              😊
-            </button>
-            <AnimatePresence>
-              {showReact && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 4 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: 4 }}
-                  transition={{ duration: 0.15 }}
-                  className={`absolute bottom-9 flex gap-1 p-2 rounded-2xl z-20 ${isOwn ? 'right-0' : 'left-0'}`}
-                  style={{ background: 'var(--panel)', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
-                >
-                  {REACTIONS.map(emoji => (
-                    <button key={emoji} onClick={() => addReaction(emoji)}
-                      className="text-xl transition-all hover:scale-125 active:scale-95 p-0.5">
-                      {emoji}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          {/* Reply + Reaction inline buttons */}
+          <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {text && onReply && (
+              <button onClick={() => onReply({ username, text })}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
+                title="Reply">
+                ↩
+              </button>
+            )}
+            <div className="relative">
+              <button onClick={() => setShowReact(v => !v)}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all hover:scale-110"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}>
+                😊
+              </button>
+              <AnimatePresence>
+                {showReact && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, y: 4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: 4 }}
+                    transition={{ duration: 0.15 }}
+                    className={`absolute bottom-8 flex gap-1 p-2 rounded-2xl z-20 ${isOwn ? 'right-0' : 'left-0'}`}
+                    style={{ background: 'var(--panel)', border: '1px solid var(--border)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
+                  >
+                    {REACTIONS.map(emoji => (
+                      <button key={emoji} onClick={() => addReaction(emoji)}
+                        className="text-xl transition-all hover:scale-125 active:scale-95 p-0.5">
+                        {emoji}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
+
+        {/* Xóa absolute buttons cũ */}
       </motion.div>
 
       <AnimatePresence>

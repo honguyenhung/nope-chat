@@ -18,9 +18,12 @@ function createPingSound() {
 }
 
 export function useNotifications() {
-  const permissionRef = useRef(Notification.permission);
+  const permissionRef = useRef(
+    typeof Notification !== 'undefined' ? Notification.permission : 'denied'
+  );
 
   useEffect(() => {
+    if (typeof Notification === 'undefined') return;
     if (permissionRef.current === 'default') {
       Notification.requestPermission()
         .then((p) => { permissionRef.current = p; })
@@ -29,16 +32,17 @@ export function useNotifications() {
   }, []);
 
   const notify = useCallback((title, body) => {
-    // Âm thanh ping khi có tin nhắn mới (kể cả khi tab đang active)
+    // Âm thanh ping khi có tin nhắn mới
     createPingSound();
 
     // Push notification chỉ khi tab ẩn
     if (document.visibilityState === 'visible') return;
+    if (typeof Notification === 'undefined') return;
     if (permissionRef.current !== 'granted') return;
     const n = new Notification(title, {
       body,
       icon: '/avatar.png',
-      silent: true, // Dùng âm thanh custom thay vì system sound
+      silent: true,
     });
     setTimeout(() => n.close(), 4000);
     n.onclick = () => { window.focus(); n.close(); };
