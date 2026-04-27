@@ -131,7 +131,7 @@ export default function AdminDashboard({ token, onLogout }) {
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
       <VideoBackground theme={theme} />
       {/* Header */}
-      <header className="border-b" style={{ background: 'var(--panel)', borderColor: 'var(--border)' }}>
+      <header className="border-b relative z-20" style={{ background: 'var(--panel)', borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -164,7 +164,7 @@ export default function AdminDashboard({ token, onLogout }) {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
         {/* Message */}
         <AnimatePresence>
           {message && (

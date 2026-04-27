@@ -399,10 +399,10 @@ export default function FullAdmin() {
   }
 
   return (
-    <div className="min-h-screen relative z-10 admin-panel" style={{ background: 'var(--bg)', backdropFilter: 'blur(2px)' }}>
+    <div className="min-h-screen relative z-10 admin-panel" style={{ background: 'var(--bg)' }}>
       <VideoBackground theme={theme} />
       {/* Header */}
-      <header className="border-b sticky top-0 z-20" style={{ background: 'var(--panel)', borderColor: 'var(--border)', backdropFilter: 'blur(20px)' }}>
+      <header className="border-b sticky top-0 z-30" style={{ background: 'var(--panel)', borderColor: 'var(--border)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
@@ -433,7 +433,7 @@ export default function FullAdmin() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 relative z-10">
         {/* Message */}
         <AnimatePresence>
           {message && (
