@@ -110,6 +110,9 @@ app.use((req, res, next) => {
   // Expect-CT (Certificate Transparency)
   res.setHeader('Expect-CT', 'max-age=86400, enforce');
   
+  // Disable compression to prevent BREACH attack
+  res.setHeader('Content-Encoding', 'identity');
+  
   next();
 });
 
