@@ -11,7 +11,7 @@ export default function FileUpload({ onFile, onImage, disabled }) {
     if (file.type.startsWith('image/')) {
       // Max 2MB for images
       if (file.size > 2 * 1024 * 1024) {
-        alert('Image too large! Max 2MB');
+        alert('❌ Image too large! Max 2MB\n\nTip: Try compressing the image first.');
         return;
       }
       
@@ -20,12 +20,16 @@ export default function FileUpload({ onFile, onImage, disabled }) {
         onImage(reader.result); // base64 image
         if (inputRef.current) inputRef.current.value = '';
       };
+      reader.onerror = () => {
+        alert('❌ Failed to read image file. Please try again.');
+        if (inputRef.current) inputRef.current.value = '';
+      };
       reader.readAsDataURL(file);
     } else {
       // Other files
       // Max 10MB
       if (file.size > 10 * 1024 * 1024) {
-        alert('File too large! Max 10MB');
+        alert('❌ File too large! Max 10MB\n\nTip: Try compressing or splitting the file.');
         return;
       }
 
@@ -37,6 +41,10 @@ export default function FileUpload({ onFile, onImage, disabled }) {
           type: file.type,
           data: reader.result, // base64
         });
+        if (inputRef.current) inputRef.current.value = '';
+      };
+      reader.onerror = () => {
+        alert('❌ Failed to read file. Please try again.');
         if (inputRef.current) inputRef.current.value = '';
       };
       reader.readAsDataURL(file);

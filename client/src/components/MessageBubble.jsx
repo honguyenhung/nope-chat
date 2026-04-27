@@ -58,6 +58,7 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
   const [lightbox, setLightbox]     = useState(false);
   const [copied, setCopied]         = useState(false);
   const [reactions, setReactions]   = useState({});
+  const [myReactions, setMyReactions] = useState(new Set());
   const [showReact, setShowReact]   = useState(false);
   const [isNew, setIsNew]           = useState(true);
   const color = nameColor(username ?? '?');
@@ -70,12 +71,35 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
 
   function copy() {
     if (!text) return;
-    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
+    navigator.clipboard.writeText(text).then(() => { 
+      setCopied(true); 
+      setTimeout(() => setCopied(false), 1500); 
+    }).catch(() => {
+      alert('❌ Failed to copy. Please try again.');
+    });
   }
 
   function addReaction(emoji) {
     setReactions(prev => ({ ...prev, [emoji]: (prev[emoji] || 0) + 1 }));
+    setMyReactions(prev => new Set([...prev, emoji]));
     setShowReact(false);
+  }
+
+  function removeReaction(emoji) {
+    setReactions(prev => {
+      const next = { ...prev };
+      if (next[emoji] > 1) {
+        next[emoji]--;
+      } else {
+        delete next[emoji];
+      }
+      return next;
+    });
+    setMyReactions(prev => {
+      const next = new Set(prev);
+      next.delete(emoji);
+      return next;
+    });
   }
 
   // Highlight search text
@@ -150,9 +174,9 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
               {formatTime(timestamp)}
             </span>
             {text && (
-              <button onClick={copy} title="Copy"
+              <button onClick={copy} title={copied ? 'Copied!' : 'Copy message'}
                 className="text-[10px] opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
-                style={{ color: 'var(--text-3)' }}>
+                style={{ color: copied ? '#3ba55d' : 'var(--text-3)' }}>
                 {copied ? '✓' : '⎘'}
               </button>
             )}
@@ -209,13 +233,21 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
           {/* Reactions display */}
           {Object.keys(reactions).length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
-              {Object.entries(reactions).map(([emoji, count]) => (
-                <button key={emoji} onClick={() => addReaction(emoji)}
-                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all hover:scale-110"
-                  style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-2)' }}>
-                  {emoji} <span>{count}</span>
-                </button>
-              ))}
+              {Object.entries(reactions).map(([emoji, count]) => {
+                const isMine = myReactions.has(emoji);
+                return (
+                  <button key={emoji} onClick={() => isMine ? removeReaction(emoji) : addReaction(emoji)}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all hover:scale-110"
+                    style={{ 
+                      background: isMine ? 'var(--accent-glow)' : 'var(--panel)', 
+                      border: isMine ? '1px solid var(--accent)' : '1px solid var(--border)', 
+                      color: 'var(--text-2)' 
+                    }}
+                    title={isMine ? 'Click to remove your reaction' : 'Click to add this reaction'}>
+                    {emoji} <span className="font-semibold">{count}</span>
+                  </button>
+                );
+              })}
             </div>
           )}
 

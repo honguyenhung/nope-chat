@@ -66,6 +66,7 @@ export default function ChatPage() {
   const [showEmoji, setShowEmoji]   = useState(false);
   const [pendingImg, setPendingImg] = useState(null);
   const [pendingFile, setPendingFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [atBottom, setAtBottom]     = useState(true);
   const [unread, setUnread]         = useState(0);
   const [securityCode, setSecurityCode] = useState(null);
@@ -117,6 +118,43 @@ export default function ChatPage() {
   useEffect(() => {
     if (atBottom) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [typingUsers.size]); // eslint-disable-line
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e) {
+      // Esc - Clear reply
+      if (e.key === 'Escape') {
+        if (replyTo) {
+          setReplyTo(null);
+          e.preventDefault();
+        }
+        if (showSearch) {
+          setShowSearch(false);
+          setSearchQuery('');
+          e.preventDefault();
+        }
+      }
+      
+      // Ctrl+K or Cmd+K - Toggle search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        setShowSearch(v => !v);
+        e.preventDefault();
+      }
+
+      // Ctrl+/ or Cmd+/ - Show shortcuts help
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        alert('⌨️ Keyboard Shortcuts:\n\n' +
+          'Esc - Clear reply or close search\n' +
+          'Ctrl+K - Toggle search\n' +
+          'Enter - Send message\n' +
+          'Shift+Enter - New line');
+        e.preventDefault();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [replyTo, showSearch]);
 
   function onScroll() {
     const el = scrollRef.current;
@@ -188,6 +226,61 @@ export default function ChatPage() {
   }
 
   function onKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } }
+
+  // Drag & Drop handlers
+  function handleDragEnter(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget === e.target) {
+      setIsDragging(false);
+    }
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    // Check if it's an image
+    if (file.type.startsWith('image/')) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert('❌ Image too large! Max 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => setPendingImg(reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      if (file.size > 10 * 1024 * 1024) {
+        alert('❌ File too large! Max 10MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPendingFile({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          data: reader.result,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 
   const onlineCount = users.filter((u) => u.online !== false).length;
   const roomLabel   = isGlobal ? 'Global' : (effectiveRoom.length > 18 ? effectiveRoom.slice(0,8)+'…' : effectiveRoom);
@@ -293,7 +386,31 @@ export default function ChatPage() {
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10"
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+
+        {/* Drag overlay */}
+        <AnimatePresence>
+          {isDragging && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+              style={{ background: 'rgba(124,106,247,0.1)', backdropFilter: 'blur(4px)' }}
+            >
+              <div className="glass p-8 text-center">
+                <div className="text-6xl mb-4">📎</div>
+                <p className="text-xl font-bold" style={{ color: 'var(--text-1)' }}>Drop file here</p>
+                <p className="text-sm mt-2" style={{ color: 'var(--text-3)' }}>Images (max 2MB) or Files (max 10MB)</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Topbar */}
         <header className="h-14 flex items-center px-4 gap-3 shrink-0"
@@ -324,6 +441,18 @@ export default function ChatPage() {
 
           {/* Right side */}
           <div className="flex items-center gap-3 shrink-0">
+            {/* Keyboard shortcuts hint */}
+            <button onClick={() => alert('⌨️ Keyboard Shortcuts:\n\n' +
+              'Esc - Clear reply or close search\n' +
+              'Ctrl+K - Toggle search\n' +
+              'Ctrl+/ - Show this help\n' +
+              'Enter - Send message\n' +
+              'Shift+Enter - New line')}
+              className="hidden md:flex p-2 rounded-xl transition-all"
+              style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}
+              title="Keyboard shortcuts (Ctrl+/)">
+              ⌨️
+            </button>
             {/* Sound toggle */}
             <button onClick={toggleSound}
               className="p-2 rounded-xl transition-all"

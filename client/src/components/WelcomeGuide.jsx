@@ -28,7 +28,8 @@ export default function WelcomeGuide() {
     { icon: '🌐', title: 'Vào Global Room', desc: 'Phòng chat công khai cho tất cả mọi người. Bấm nút "Global" để vào ngay.' },
     { icon: '🔒', title: 'Tạo phòng riêng', desc: 'Tạo phòng chat riêng tư với mã UUID độc nhất. Có thể đặt mật khẩu bảo vệ.' },
     { icon: '🔗', title: 'Chia sẻ phòng', desc: 'Copy link hoặc quét QR code để mời bạn bè vào phòng của bạn.' },
-    { icon: '😊', title: 'Tính năng chat', desc: 'Gửi ảnh, emoji, reaction tin nhắn, reply, và nhiều hơn nữa.' },
+    { icon: '📎', title: 'Gửi file & ảnh', desc: 'Upload ảnh (max 2MB) và file (max 10MB). Kéo thả file vào chat để gửi nhanh.' },
+    { icon: '😊', title: 'Tính năng chat', desc: 'Reply tin nhắn, reaction emoji, search, link preview, và bật/tắt âm thanh thông báo.' },
     { icon: '🛡️', title: 'Bảo mật E2EE', desc: 'Mọi tin nhắn đều được mã hóa đầu cuối. Server không đọc được nội dung.' },
   ];
 
