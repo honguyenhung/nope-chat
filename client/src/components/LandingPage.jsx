@@ -6,8 +6,26 @@ import { useFavorites } from '../hooks/useFavorites.js';
 import { useThemeContext } from '../App.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 
-function slugify(s) {
-  return s.trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').slice(0, 64);
+function DiscordButton() {
+  const [copied, setCopied] = useState(false);
+  function handleCopy() {
+    navigator.clipboard.writeText('.yennhimylove_');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105 w-full text-left"
+      style={{ background: 'rgba(124,106,247,0.12)', color: 'var(--text-1)' }}>
+      <span className="text-base">🎮</span>
+      <span className="flex-1">Discord</span>
+      <span className="text-[10px] px-1.5 py-0.5 rounded-md transition-all"
+        style={{ background: copied ? 'rgba(59,165,93,0.2)' : 'rgba(124,106,247,0.2)', color: copied ? '#3ba55d' : 'var(--text-3)' }}>
+        {copied ? '✓ Copied!' : 'Copy'}
+      </span>
+    </button>
+  );
 }
 
 const WORDS = ['Ghost','Shadow','Phantom','Cipher','Void','Neon','Stealth','Raven','Lynx','Viper'];
@@ -333,13 +351,7 @@ export default function LandingPage() {
                   <span className="text-base">📘</span>
                   <span>Facebook</span>
                 </a>
-                <button
-                  onClick={() => { navigator.clipboard.writeText('.yennhimylove_'); }}
-                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105 w-full text-left"
-                  style={{ background: 'rgba(124,106,247,0.12)', color: 'var(--text-1)' }}>
-                  <span className="text-base">🎮</span>
-                  <span>Discord</span>
-                </button>
+                <DiscordButton />
               </div>
             </motion.div>
           )}
