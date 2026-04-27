@@ -141,8 +141,8 @@ export default function ChatPage() {
         }
       }
       
-      // Ctrl+K or Cmd+K - Toggle search
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      // Ctrl+F or Cmd+F - Toggle search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         setShowSearch(v => !v);
         e.preventDefault();
       }

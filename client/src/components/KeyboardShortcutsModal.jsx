@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function KeyboardShortcutsModal({ show, onClose }) {
   const shortcuts = [
     { key: 'Esc', desc: 'Clear reply or close search', icon: '⎋' },
-    { key: 'Ctrl+K', desc: 'Toggle search', icon: '🔍' },
+    { key: 'Ctrl+F', desc: 'Toggle search', icon: '🔍' },
     { key: 'Ctrl+/', desc: 'Show this help', icon: '❓' },
     { key: 'Enter', desc: 'Send message', icon: '✉️' },
     { key: 'Shift+Enter', desc: 'New line', icon: '↵' },
