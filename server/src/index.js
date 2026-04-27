@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimiter } from './middleware/rateLimiter.js';
+import { securityMiddleware, validateRequestSize, validateRequestMethod } from './middleware/requestValidator.js';
 import { registerSocketHandlers } from './sockets/index.js';
 import { apiRouter } from './routes/api.js';
 import { adminRouter } from './routes/admin.js';
@@ -68,15 +69,71 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'blob:'],
       connectSrc: ["'self'", 'ws:', 'wss:'],
+      frameSrc: ["'none'"], // Prevent iframe embedding
+      objectSrc: ["'none'"], // Block plugins
+      baseUri: ["'self'"], // Restrict base tag
+      formAction: ["'self'"], // Restrict form submissions
     },
   },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: { action: 'deny' }, // X-Frame-Options: DENY
+  noSniff: true, // X-Content-Type-Options: nosniff
+  xssFilter: true, // X-XSS-Protection: 1; mode=block
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 }));
+
+// Additional security headers
+app.use((req, res, next) => {
+  // Hide server info
+  res.removeHeader('X-Powered-By');
+  
+  // Prevent MIME sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+  
+  // XSS protection
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  
+  // Referrer policy
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Permissions policy (disable unnecessary features)
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), payment=(), usb=()');
+  
+  // Expect-CT (Certificate Transparency)
+  res.setHeader('Expect-CT', 'max-age=86400, enforce');
+  
+  next();
+});
+
 app.use(cors({ origin: CLIENT_URL }));
 app.use(express.json({ limit: '10kb' }));
+
+// Security validation middleware
+app.use(validateRequestSize(10 * 1024)); // 10KB max for API requests
+app.use(validateRequestMethod(['GET', 'POST']));
+app.use(securityMiddleware);
 
 // Root route - redirect to frontend
 app.get('/', (req, res) => {
   res.redirect(CLIENT_URL);
+});
+
+// Health check (minimal info)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Hide 404 details
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
 });
 
 // Admin routes first - completely bypass rate limiting

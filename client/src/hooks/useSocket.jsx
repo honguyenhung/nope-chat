@@ -2,7 +2,11 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback } f
 import { io } from 'socket.io-client';
 
 const SocketContext = createContext(null);
-const SOCKET_URL = import.meta.env.VITE_SERVER_URL || '';
+
+// Use same domain for backend (reverse proxy)
+// Client: https://your-domain.com
+// Backend: https://your-domain.com/api (proxied)
+const SOCKET_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 export function SocketProvider({ children }) {
   const socketRef = useRef(null);
