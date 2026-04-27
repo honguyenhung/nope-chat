@@ -288,7 +288,6 @@ export default function ChatPage() {
               </span>
             </div>
             <SecurityBadge roomId={effectiveRoom} />
-            <div className="hidden md:block"><ThemeSelector theme={theme} onSelect={setThemeById} /></div>
           </div>
         </header>
 
@@ -423,7 +422,7 @@ function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, set
             </svg>
             Home
           </button>
-          <ThemeSelector theme={theme} onSelect={setThemeById} />
+        </div>
         </div>
 
         {/* Room badge */}
