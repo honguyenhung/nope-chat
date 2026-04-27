@@ -6,6 +6,8 @@ import { useTheme } from './hooks/useTheme.js';
 import LandingPage from './components/LandingPage.jsx';
 import ChatPage from './components/ChatPage.jsx';
 import FullAdmin from './components/FullAdmin.jsx';
+import WelcomeGuide from './components/WelcomeGuide.jsx';
+import VideoBackground from './components/VideoBackground.jsx';
 
 export const ThemeContext = createContext({ theme: 'dark', toggle: () => {}, setThemeById: () => {} });
 export const useThemeContext = () => useContext(ThemeContext);
@@ -17,6 +19,8 @@ export default function App() {
     <ThemeContext.Provider value={{ theme, toggle, setThemeById }}>
       <CryptoProvider>
         <SocketProvider>
+          <VideoBackground theme={theme} />
+          <WelcomeGuide />
           <Routes>
             <Route path="/"            element={<LandingPage />} />
             <Route path="/room/:roomId" element={<ChatPage />} />

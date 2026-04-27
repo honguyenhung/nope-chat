@@ -52,6 +52,8 @@ export default function ThemeSelector({ theme, onSelect }) {
                 >
                   <span className="text-base">{t.icon}</span>
                   <span>{t.label}</span>
+                  {t.video && <span className="text-[9px] px-1.5 py-0.5 rounded-md ml-1" style={{ background: 'var(--accent-glow)', color: 'var(--accent)' }}>VIDEO</span>}
+                  {t.bg && !t.video && <span className="text-[9px] px-1.5 py-0.5 rounded-md ml-1" style={{ background: 'var(--accent-glow)', color: 'var(--accent)' }}>IMG</span>}
                   {theme === t.id && <span className="ml-auto text-xs">✓</span>}
                 </button>
               ))}
