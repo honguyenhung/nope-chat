@@ -554,13 +554,74 @@ html {
 @media screen and (max-width: 640px) {
   .btn {
     min-height: 44px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 14px;
   }
   
-  /* Larger message bubbles */
+  /* Smaller message bubbles */
   .bubble-me, .bubble-them {
-    font-size: 15px;
-    padding: 12px 16px;
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+  
+  /* Smaller topbar */
+  header {
+    height: 3.5rem !important;
+  }
+  
+  /* Smaller input area */
+  textarea, input {
+    font-size: 14px !important;
+    padding: 0.625rem 1rem !important;
+  }
+  
+  /* Smaller buttons in input bar */
+  .w-9.h-9 {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+  
+  /* Smaller avatars */
+  .w-8.h-8 {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+  
+  /* Compact sidebar */
+  aside {
+    width: 16rem !important;
+  }
+  
+  /* Smaller glass cards */
+  .glass {
+    padding: 1rem !important;
+  }
+  
+  /* Smaller text */
+  .text-sm {
+    font-size: 13px !important;
+  }
+  
+  .text-xs {
+    font-size: 11px !important;
+  }
+}
+
+/* Extra small phones */
+@media screen and (max-width: 375px) {
+  .bubble-me, .bubble-them {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 13px;
+  }
+  
+  .w-9.h-9 {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
   }
 }
 

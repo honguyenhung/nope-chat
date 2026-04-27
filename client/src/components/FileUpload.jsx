@@ -64,7 +64,7 @@ export default function FileUpload({ onFile, onImage, disabled }) {
       />
       <label
         htmlFor="file-upload"
-        className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all ${
+        className={`w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center text-base md:text-lg shrink-0 transition-all ${
           disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:scale-105'
         }`}
         style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-2)' }}

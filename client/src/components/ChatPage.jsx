@@ -445,10 +445,10 @@ export default function ChatPage() {
         </AnimatePresence>
 
         {/* Topbar */}
-        <header className="h-14 flex items-center px-4 gap-3 shrink-0"
+        <header className="h-14 md:h-14 flex items-center px-3 md:px-4 gap-2 md:gap-3 shrink-0"
           style={{ background: 'var(--topbar-bg)', borderBottom: '1px solid var(--border)', backdropFilter: 'blur(20px)' }}>
           {/* Mobile menu */}
-          <button className="md:hidden p-2 rounded-xl transition-colors"
+          <button className="md:hidden p-1.5 rounded-xl transition-colors"
             style={{ color: 'var(--text-2)' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'var(--panel-hover)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -460,19 +460,19 @@ export default function ChatPage() {
           </button>
 
           {/* Room info */}
-          <div className="flex-1 min-w-0 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
+          <div className="flex-1 min-w-0 flex items-center gap-2">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
               style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', boxShadow: '0 2px 10px var(--accent-glow)' }}>
               {isGlobal ? '🌐' : '🔒'}
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-sm truncate" style={{ color: 'var(--text-1)' }}>{isGlobal ? 'Global Room' : roomLabel}</p>
-              <p className="text-[11px]" style={{ color: 'var(--text-3)' }}>{onlineCount} online</p>
+              <p className="font-bold text-xs md:text-sm truncate" style={{ color: 'var(--text-1)' }}>{isGlobal ? 'Global Room' : roomLabel}</p>
+              <p className="text-[10px] md:text-[11px]" style={{ color: 'var(--text-3)' }}>{onlineCount} online</p>
             </div>
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
             {/* Keyboard shortcuts hint */}
             <button onClick={() => setShowShortcuts(true)}
               className="hidden md:flex p-2 rounded-xl transition-all"
@@ -482,19 +482,19 @@ export default function ChatPage() {
             </button>
             {/* Sound toggle */}
             <button onClick={toggleSound}
-              className="p-2 rounded-xl transition-all"
+              className="p-1.5 md:p-2 rounded-xl transition-all text-base md:text-lg"
               style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-2)' }}
               title={soundEnabled ? 'Sound: ON' : 'Sound: OFF'}>
               {soundEnabled ? '🔔' : '🔕'}
             </button>
             {/* Search button */}
             <button onClick={() => setShowSearch(v => !v)}
-              className="p-2 rounded-xl transition-all"
+              className="p-1.5 md:p-2 rounded-xl transition-all text-base md:text-lg"
               style={{ background: showSearch ? 'var(--accent-glow)' : 'var(--panel)', border: '1px solid var(--border)', color: showSearch ? 'var(--accent)' : 'var(--text-2)' }}
               title="Search messages">
               🔍
             </button>
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl"
+            <div className="hidden sm:flex items-center gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-xl"
               style={{ background: 'var(--panel)', border: '1px solid var(--border)' }}>
               <span className="w-2 h-2 rounded-full" style={{ background: connected ? '#3ba55d' : '#f59e0b', boxShadow: connected ? '0 0 6px #3ba55d' : 'none' }} />
               <span className="text-xs font-medium max-w-[110px] truncate" style={{ color: 'var(--text-2)' }}>
@@ -674,7 +674,7 @@ export default function ChatPage() {
           <div className="flex gap-2 items-end">
             {/* Emoji btn */}
             <button type="button" onClick={() => setShowEmoji((v) => !v)}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all"
+              className="w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center text-base md:text-lg shrink-0 transition-all"
               style={{ background: showEmoji ? 'var(--accent-glow)' : 'var(--panel)', border: '1px solid var(--border)', color: showEmoji ? 'var(--accent)' : 'var(--text-2)' }}>
               😊
             </button>
@@ -690,7 +690,7 @@ export default function ChatPage() {
             <textarea ref={textareaRef} value={input} onChange={onInput} onKeyDown={onKey}
               placeholder={connected ? 'Write a message…' : 'Reconnecting...'}
               disabled={!connected} rows={1}
-              className="flex-1 resize-none outline-none text-sm rounded-xl px-4 py-2.5 max-h-28 font-[inherit]"
+              className="flex-1 resize-none outline-none text-sm rounded-xl px-3 md:px-4 py-2 md:py-2.5 max-h-28 font-[inherit]"
               style={{
                 background: 'var(--input-bg)', color: 'var(--text-1)',
                 border: '1.5px solid var(--border)', opacity: connected ? 1 : 0.5,
@@ -702,9 +702,9 @@ export default function ChatPage() {
 
             {/* Send btn */}
             <button onClick={onSend} disabled={!input.trim() || !connected}
-              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-8 h-8 md:w-9 md:h-9 rounded-xl flex items-center justify-center shrink-0 transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg,var(--accent),var(--accent-2))', boxShadow: input.trim() ? '0 4px 16px var(--accent-glow)' : 'none' }}>
-              <svg className="w-4 h-4 text-white rotate-90" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 md:w-4 md:h-4 text-white rotate-90" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
               </svg>
             </button>
