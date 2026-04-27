@@ -6,7 +6,7 @@ export const THEMES = [
   { id: 'dracula',    label: 'Dracula',   icon: '🧛', video: '/themes/dracula.webm',  bg: null },
   { id: 'monokai',    label: 'Monokai',   icon: '🌿', video: '/themes/monokai.webm',  bg: null },
   { id: 'nord',       label: 'Nord',      icon: '❄️', video: '/themes/nord.webm',     bg: null },
-  { id: 'pink',       label: 'Pink',      icon: '🌷', video: '/themes/pink.webm',     bg: null },
+  { id: 'pink',       label: 'Pink',      icon: '🌷', video: null,                    bg: null }, // Tạm thời tắt video pink
 ];
 
 export function useTheme() {
