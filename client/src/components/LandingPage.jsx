@@ -317,28 +317,28 @@ export default function LandingPage() {
               <div className="flex flex-col gap-2">
                 <a href="mailto:honguyenhung2010@gmail.com"
                   className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
-                  style={{ background: 'rgba(234,67,53,0.12)', color: '#ea4335' }}>
+                  style={{ background: 'rgba(124,106,247,0.12)', color: 'var(--text-1)' }}>
                   <span className="text-base">📧</span>
-                  <span>honguyenhung2010@gmail.com</span>
+                  <span>Gmail</span>
                 </a>
                 <a href="https://zalo.me/0355417718" target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
-                  style={{ background: 'rgba(0,104,255,0.12)', color: '#0068ff' }}>
+                  style={{ background: 'rgba(124,106,247,0.12)', color: 'var(--text-1)' }}>
                   <span className="text-base">💬</span>
-                  <span>Zalo · 0355417718</span>
+                  <span>Zalo</span>
                 </a>
                 <a href="https://web.facebook.com/Nguyen.Hvng" target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
-                  style={{ background: 'rgba(24,119,242,0.12)', color: '#1877f2' }}>
+                  style={{ background: 'rgba(124,106,247,0.12)', color: 'var(--text-1)' }}>
                   <span className="text-base">📘</span>
                   <span>Facebook</span>
                 </a>
                 <button
                   onClick={() => { navigator.clipboard.writeText('.yennhimylove_'); }}
                   className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105 w-full text-left"
-                  style={{ background: 'rgba(88,101,242,0.12)', color: '#5865f2' }}>
+                  style={{ background: 'rgba(124,106,247,0.12)', color: 'var(--text-1)' }}>
                   <span className="text-base">🎮</span>
-                  <span>.yennhimylove_</span>
+                  <span>Discord</span>
                 </button>
               </div>
             </motion.div>
