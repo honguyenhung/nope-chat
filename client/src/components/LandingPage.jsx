@@ -6,6 +6,12 @@ import { useFavorites } from '../hooks/useFavorites.js';
 import { useThemeContext } from '../App.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 
+function slugify(s) {
+  return s.trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').slice(0, 64);
+}
+
+const WORDS = ['Ghost','Shadow','Phantom','Cipher','Void','Neon','Stealth','Raven','Lynx','Viper'];
+
 function DiscordButton() {
   const [copied, setCopied] = useState(false);
   function handleCopy() {

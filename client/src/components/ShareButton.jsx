@@ -16,9 +16,8 @@ export default function ShareButton({ roomId }) {
   return (
     <div className="flex flex-col gap-3 items-center w-full">
       {/* QR Code */}
-      <div className="bg-white p-2 rounded-xl w-full flex items-center justify-center"
-        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <QRCodeSVG value={url} size={120} fgColor="#09090b" bgColor="#ffffff" style={{ width: '100%', maxWidth: 120, height: 'auto' }} />
+      <div className="bg-white p-3 rounded-xl" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <QRCodeSVG value={url} size={160} fgColor="#09090b" bgColor="#ffffff" />
       </div>
 
       <button onClick={copy}
