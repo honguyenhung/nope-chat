@@ -5,7 +5,9 @@ import ThemeSelector from './ThemeSelector.jsx';
 import { useThemeContext } from '../App.jsx';
 
 export default function FullAdmin() {
-  const { theme, setThemeById } = useThemeContext();
+  const themeContext = useThemeContext();
+  const theme = themeContext?.theme || 'darkblue';
+  const setThemeById = themeContext?.setThemeById || (() => {});
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
