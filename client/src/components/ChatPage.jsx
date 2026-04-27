@@ -13,7 +13,6 @@ import TypingIndicator from './TypingIndicator.jsx';
 import UserList from './UserList.jsx';
 import ShareButton from './ShareButton.jsx';
 import EmojiPicker from './EmojiPicker.jsx';
-import ImageUpload from './ImageUpload.jsx';
 import ImagePreview from './ImagePreview.jsx';
 import FileUpload from './FileUpload.jsx';
 import FilePreview from './FilePreview.jsx';
@@ -520,11 +519,12 @@ export default function ChatPage() {
               😊
             </button>
 
-            {/* Image btn */}
-            <ImageUpload onImage={(d) => { setPendingImg(d); setShowEmoji(false); }} disabled={!connected} />
-
-            {/* File btn */}
-            <FileUpload onFile={(f) => { setPendingFile(f); setShowEmoji(false); }} disabled={!connected} />
+            {/* File/Image upload btn */}
+            <FileUpload 
+              onImage={(d) => { setPendingImg(d); setShowEmoji(false); }} 
+              onFile={(f) => { setPendingFile(f); setShowEmoji(false); }} 
+              disabled={!connected} 
+            />
 
             {/* Textarea */}
             <textarea ref={textareaRef} value={input} onChange={onInput} onKeyDown={onKey}
