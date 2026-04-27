@@ -10,7 +10,7 @@ export const THEMES = [
 ];
 
 export function useTheme() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'sky');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'pink');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
