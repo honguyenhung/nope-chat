@@ -4,12 +4,16 @@ import { useCrypto } from './useCrypto.jsx';
 import { sanitize } from '../utils/profanityFilter.js';
 
 const MAX_MESSAGES = 200;
+const MESSAGES_PER_PAGE = 50;
 
 export function useChat(roomId, password = null) {
   const { socket, identity } = useSocket();
   const { publicKeyB64, addPeer, removePeer, encrypt, decrypt, encryptImg, decryptImg } = useCrypto();
 
   const [messages,    setMessages]    = useState([]);
+  const [allMessages, setAllMessages] = useState([]); // Store all messages
+  const [hasMore,     setHasMore]     = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [users,       setUsers]       = useState([]);
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [joinError,   setJoinError]   = useState(null); // 'WRONG_PASSWORD' | null
@@ -38,7 +42,9 @@ export function useChat(roomId, password = null) {
             return { ...m, text: '🔒 Decryption failed', imageData: null };
           }))
         );
-        setMessages(decrypted.slice(-MAX_MESSAGES));
+        setAllMessages(decrypted);
+        setMessages(decrypted.slice(-MESSAGES_PER_PAGE)); // Show last 50 initially
+        setHasMore(decrypted.length > MESSAGES_PER_PAGE);
       } catch (err) {
         console.error('Failed to process message history:', err);
         setMessages([]); // Show empty instead of crashing
@@ -58,6 +64,12 @@ export function useChat(roomId, password = null) {
             return next;
           }
         }
+        const next = [...prev, decrypted];
+        return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
+      });
+
+      // Also add to allMessages
+      setAllMessages(prev => {
         const next = [...prev, decrypted];
         return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
       });
@@ -172,15 +184,32 @@ export function useChat(roomId, password = null) {
       imageData = msg.imageData;
     }
 
-    return { ...msg, text, imageData };
+    // Decrypt file
+    let fileData = null;
+    if (msg.encryptedFile) {
+      try {
+        const decryptedData = await decryptImg(msg.encryptedFile, msg.fileIv, ctx);
+        fileData = {
+          data: decryptedData,
+          name: msg.fileMetadata?.name || 'file',
+          size: msg.fileMetadata?.size || 0,
+          type: msg.fileMetadata?.type || 'application/octet-stream',
+        };
+      } catch (err) {
+        console.warn('Failed to decrypt file:', err);
+        fileData = null;
+      }
+    }
+
+    return { ...msg, text, imageData, fileData };
   }
 
   // ── Send message ─────────────────────────────────────────
 
   const sendMessage = useCallback(
-    async (text, rawImageDataUrl = null) => {
+    async (text, rawImageDataUrl = null, fileData = null) => {
       if (!socket?.connected) return;
-      if (!text?.trim() && !rawImageDataUrl) return;
+      if (!text?.trim() && !rawImageDataUrl && !fileData) return;
 
       const clean = text ? sanitize(text.trim()) : '';
       const ctx   = { roomId };
@@ -203,6 +232,16 @@ export function useChat(roomId, password = null) {
         imageIv        = encImg.iv;
       }
 
+      // Encrypt file
+      let encryptedFile = null, fileIv = null, fileMetadata = null;
+      if (fileData) {
+        const encFile = await encryptImg(fileData.data, ctx); // Reuse image encryption for files
+        if (!encFile) return;
+        encryptedFile = encFile.ciphertext;
+        fileIv = encFile.iv;
+        fileMetadata = { name: fileData.name, size: fileData.size, type: fileData.type };
+      }
+
       // Optimistic UI — show plaintext locally immediately
       const optimisticMsg = {
         id:             `opt-${Date.now()}`,
@@ -210,6 +249,7 @@ export function useChat(roomId, password = null) {
         username:       identity?.username,
         text:           clean || null,
         imageData:      rawImageDataUrl || null, // local preview (never sent)
+        fileData:       fileData || null, // local preview
         encryptedContent: ciphertext,
         iv,
         timestamp:      Date.now(),
@@ -227,6 +267,9 @@ export function useChat(roomId, password = null) {
         iv,
         encryptedImage,   // encrypted image blob
         imageIv,          // IV for image decryption
+        encryptedFile,    // encrypted file blob
+        fileIv,           // IV for file decryption
+        fileMetadata,     // file name, size, type (not encrypted - for display)
         // imageData is intentionally NOT sent — server never sees raw images
       });
     },
@@ -241,5 +284,24 @@ export function useChat(roomId, password = null) {
     [socket, roomId]
   );
 
-  return { messages, users, typingUsers, joinError, sendMessage, sendTyping };
+  const loadMoreMessages = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    setTimeout(() => {
+      setMessages(prev => {
+        const currentCount = prev.length;
+        const startIndex = Math.max(0, allMessages.length - currentCount - MESSAGES_PER_PAGE);
+        const endIndex = allMessages.length - currentCount;
+        const olderMessages = allMessages.slice(startIndex, endIndex);
+        
+        setHasMore(startIndex > 0);
+        setLoadingMore(false);
+        
+        return [...olderMessages, ...prev];
+      });
+    }, 300); // Simulate loading delay
+  }, [allMessages, loadingMore, hasMore]);
+
+  return { messages, users, typingUsers, joinError, sendMessage, sendTyping, loadMoreMessages, hasMore, loadingMore };
 }

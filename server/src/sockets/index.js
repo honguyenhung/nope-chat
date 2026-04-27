@@ -139,7 +139,7 @@ export function registerSocketHandlers(io) {
     });
 
     // --- Send message ---
-    socket.on('send_message', ({ roomId, encryptedContent, iv, recipientId, encryptedImage, imageIv }) => {
+    socket.on('send_message', ({ roomId, encryptedContent, iv, recipientId, encryptedImage, imageIv, encryptedFile, fileIv, fileMetadata }) => {
       incrementMessages(); // Monitor message rate
       
       if (!checkSocketRateLimit(socket.id)) {
@@ -172,7 +172,19 @@ export function registerSocketHandlers(io) {
         }
       }
 
-      if (!encryptedContent && !encryptedImage) return;
+      // Validate encrypted file (max 10MB)
+      if (encryptedFile) {
+        if (!b64Regex.test(encryptedFile) || encryptedFile.length > 15_000_000) {
+          socket.emit('error', { message: 'File too large or invalid. Max 10MB.' });
+          return;
+        }
+        if (!fileIv || !b64Regex.test(fileIv)) {
+          socket.emit('error', { message: 'Invalid file IV.' });
+          return;
+        }
+      }
+
+      if (!encryptedContent && !encryptedImage && !encryptedFile) return;
 
       const targetRoom = roomId || 'global';
       const message = {
@@ -183,6 +195,9 @@ export function registerSocketHandlers(io) {
         iv,
         encryptedImage:   encryptedImage || null, // encrypted image — server cannot read
         imageIv:          imageIv || null,
+        encryptedFile:    encryptedFile || null, // encrypted file — server cannot read
+        fileIv:           fileIv || null,
+        fileMetadata:     fileMetadata || null, // file name, size, type (not encrypted)
         recipientId,
         timestamp:        Date.now(),
       };

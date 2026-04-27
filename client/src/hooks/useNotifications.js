@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 // Tạo âm thanh ping nhỏ bằng Web Audio API (không cần file)
 function createPingSound() {
@@ -22,6 +22,12 @@ export function useNotifications() {
     typeof Notification !== 'undefined' ? Notification.permission : 'denied'
   );
 
+  // Load sound preference from localStorage
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    const saved = localStorage.getItem('soundEnabled');
+    return saved === null ? true : saved === 'true';
+  });
+
   useEffect(() => {
     if (typeof Notification === 'undefined') return;
     if (permissionRef.current === 'default') {
@@ -31,9 +37,19 @@ export function useNotifications() {
     }
   }, []);
 
+  const toggleSound = useCallback(() => {
+    setSoundEnabled(prev => {
+      const newValue = !prev;
+      localStorage.setItem('soundEnabled', String(newValue));
+      return newValue;
+    });
+  }, []);
+
   const notify = useCallback((title, body) => {
-    // Âm thanh ping khi có tin nhắn mới
-    createPingSound();
+    // Âm thanh ping khi có tin nhắn mới (nếu bật)
+    if (soundEnabled) {
+      createPingSound();
+    }
 
     // Push notification chỉ khi tab ẩn
     if (document.visibilityState === 'visible') return;
@@ -46,7 +62,7 @@ export function useNotifications() {
     });
     setTimeout(() => n.close(), 4000);
     n.onclick = () => { window.focus(); n.close(); };
-  }, []);
+  }, [soundEnabled]);
 
-  return { notify };
+  return { notify, soundEnabled, toggleSound };
 }

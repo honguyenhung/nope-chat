@@ -15,6 +15,8 @@ import ShareButton from './ShareButton.jsx';
 import EmojiPicker from './EmojiPicker.jsx';
 import ImageUpload from './ImageUpload.jsx';
 import ImagePreview from './ImagePreview.jsx';
+import FileUpload from './FileUpload.jsx';
+import FilePreview from './FilePreview.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import ThemeSelector from './ThemeSelector.jsx';
 import SecurityBadge from './SecurityBadge.jsx';
@@ -42,7 +44,7 @@ export default function ChatPage() {
     });
   }, [socket, effectiveRoom, isGlobal]);
 
-  const { messages, users, typingUsers, joinError, sendMessage, sendTyping } = useChat(
+  const { messages, users, typingUsers, joinError, sendMessage, sendTyping, loadMoreMessages, hasMore, loadingMore } = useChat(
     effectiveRoom,
     password || null
   );
@@ -54,7 +56,7 @@ export default function ChatPage() {
       setPassword('');
     }
   }, [joinError]);
-  const { notify }      = useNotifications();
+  const { notify, soundEnabled, toggleSound } = useNotifications();
   const { add: fav }    = useFavorites();
   const { theme, toggle: toggleTheme, setThemeById } = useThemeContext();
 
@@ -64,6 +66,7 @@ export default function ChatPage() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showEmoji, setShowEmoji]   = useState(false);
   const [pendingImg, setPendingImg] = useState(null);
+  const [pendingFile, setPendingFile] = useState(null);
   const [atBottom, setAtBottom]     = useState(true);
   const [unread, setUnread]         = useState(0);
   const [securityCode, setSecurityCode] = useState(null);
@@ -119,6 +122,17 @@ export default function ChatPage() {
   function onScroll() {
     const el = scrollRef.current;
     if (!el) return;
+    
+    // Check if scrolled to top (load more)
+    if (el.scrollTop < 100 && hasMore && !loadingMore) {
+      const prevHeight = el.scrollHeight;
+      loadMoreMessages();
+      // Maintain scroll position after loading
+      setTimeout(() => {
+        if (el) el.scrollTop = el.scrollHeight - prevHeight;
+      }, 50);
+    }
+    
     const near = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
     setAtBottom(near);
     if (near) setUnread(0);
@@ -311,6 +325,13 @@ export default function ChatPage() {
 
           {/* Right side */}
           <div className="flex items-center gap-3 shrink-0">
+            {/* Sound toggle */}
+            <button onClick={toggleSound}
+              className="p-2 rounded-xl transition-all"
+              style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-2)' }}
+              title={soundEnabled ? 'Sound: ON' : 'Sound: OFF'}>
+              {soundEnabled ? '🔔' : '🔕'}
+            </button>
             {/* Search button */}
             <button onClick={() => setShowSearch(v => !v)}
               className="p-2 rounded-xl transition-all"
@@ -377,6 +398,21 @@ export default function ChatPage() {
 
         {/* Messages */}
         <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto px-4 py-5 space-y-1">
+          {/* Load more indicator */}
+          {loadingMore && (
+            <div className="flex justify-center py-3">
+              <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
+          {hasMore && !loadingMore && messages.length > 0 && (
+            <div className="flex justify-center py-2">
+              <button onClick={loadMoreMessages}
+                className="text-xs px-3 py-1.5 rounded-lg transition-all hover:scale-105"
+                style={{ background: 'var(--panel)', border: '1px solid var(--border)', color: 'var(--text-3)' }}>
+                ↑ Load older messages
+              </button>
+            </div>
+          )}
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full gap-3 select-none">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
@@ -425,6 +461,13 @@ export default function ChatPage() {
               sendMessage('', pendingImg); 
               setPendingImg(null); 
             }} onCancel={() => setPendingImg(null)} />}
+          </AnimatePresence>
+          <AnimatePresence>
+            {pendingFile && <FilePreview file={pendingFile} onSend={() => {
+              setReplyTo(null);
+              sendMessage('', null, pendingFile);
+              setPendingFile(null);
+            }} onCancel={() => setPendingFile(null)} />}
           </AnimatePresence>
           {/* Reply preview */}
           <AnimatePresence>
@@ -479,6 +522,9 @@ export default function ChatPage() {
 
             {/* Image btn */}
             <ImageUpload onImage={(d) => { setPendingImg(d); setShowEmoji(false); }} disabled={!connected} />
+
+            {/* File btn */}
+            <FileUpload onFile={(f) => { setPendingFile(f); setShowEmoji(false); }} disabled={!connected} />
 
             {/* Textarea */}
             <textarea ref={textareaRef} value={input} onChange={onInput} onKeyDown={onKey}

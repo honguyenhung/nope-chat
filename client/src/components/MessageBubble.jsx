@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LinkPreview from './LinkPreview.jsx';
 
 function formatTime(ts) {
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -53,7 +54,7 @@ function Lightbox({ src, onClose }) {
 }
 
 export default function MessageBubble({ message, isOwn, onReply, highlight }) {
-  const { id, username, text, imageData, timestamp, optimistic, isAdmin } = message;
+  const { id, username, text, imageData, fileData, timestamp, optimistic, isAdmin } = message;
   const [lightbox, setLightbox]     = useState(false);
   const [copied, setCopied]         = useState(false);
   const [reactions, setReactions]   = useState({});
@@ -167,14 +168,38 @@ export default function MessageBubble({ message, isOwn, onReply, highlight }) {
             />
           )}
 
-          {/* Text */}
-          {text && (
-            <div className={`px-4 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap ${isOwn ? 'bubble-me' : 'bubble-them'}`}>
-              {highlightText(text, highlight)}
-            </div>
+          {/* File attachment */}
+          {fileData && (
+            <a href={fileData.data} download={fileData.name}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl transition-all hover:scale-[1.02]"
+              style={{ background: isOwn ? 'rgba(124,106,247,0.15)' : 'var(--panel)', border: '1px solid var(--border)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-2xl shrink-0"
+                style={{ background: 'var(--input-bg)' }}>
+                {fileData.type?.includes('pdf') ? '📄' : fileData.type?.includes('word') ? '📝' : fileData.type?.includes('zip') ? '📦' : '📎'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate" style={{ color: 'var(--text-1)' }}>
+                  {fileData.name}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--text-3)' }}>
+                  {fileData.size ? `${(fileData.size / 1024).toFixed(1)} KB` : 'File'}
+                </p>
+              </div>
+              <div className="text-xl">⬇️</div>
+            </a>
           )}
 
-          {!text && !imageData && (
+          {/* Text */}
+          {text && (
+            <>
+              <div className={`px-4 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap ${isOwn ? 'bubble-me' : 'bubble-them'}`}>
+                {highlightText(text, highlight)}
+              </div>
+              <LinkPreview text={text} />
+            </>
+          )}
+
+          {!text && !imageData && !fileData && (
             <div className="px-4 py-2.5 rounded-2xl text-sm italic"
               style={{ background: 'var(--panel)', color: 'var(--text-3)', border: '1px solid var(--border)' }}>
               🔒 Decrypting...
