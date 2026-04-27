@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://nope-chat-serverai.onrender.com/api/:path*"
+      "destination": "$BACKEND_URL/api/:path*"
     },
     {
       "source": "/socket.io/:path*",
-      "destination": "https://nope-chat-serverai.onrender.com/socket.io/:path*"
+      "destination": "$BACKEND_URL/socket.io/:path*"
     }
   ],
   "headers": [
