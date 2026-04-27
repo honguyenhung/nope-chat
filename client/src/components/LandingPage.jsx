@@ -24,6 +24,7 @@ export default function LandingPage() {
   const [roomPassword, setRoomPassword] = useState('');
   const [creating, setCreating]   = useState(false);
   const [tab, setTab]             = useState('join');
+  const [showContact, setShowContact] = useState(false);
 
   function handleSaveNick(e) {
     e.preventDefault();
@@ -297,122 +298,63 @@ export default function LandingPage() {
             👑 admin
           </button>
         </motion.div>
+      </div>
 
-        {/* ── Support & Contact ── */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-          className="glass w-full p-5"
+      {/* ── Floating Contact Button ── */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        {/* Contact popup */}
+        <AnimatePresence>
+          {showContact && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="glass p-4 rounded-2xl shadow-2xl"
+              style={{ width: 220, border: '1px solid var(--border)' }}
+            >
+              <p className="text-xs font-bold mb-3" style={{ color: 'var(--text-1)' }}>📬 Contact</p>
+              <div className="flex flex-col gap-2">
+                <a href="mailto:honguyenhung2010@gmail.com"
+                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
+                  style={{ background: 'rgba(234,67,53,0.12)', color: '#ea4335' }}>
+                  <span className="text-base">📧</span>
+                  <span>honguyenhung2010@gmail.com</span>
+                </a>
+                <a href="https://zalo.me/0355417718" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
+                  style={{ background: 'rgba(0,104,255,0.12)', color: '#0068ff' }}>
+                  <span className="text-base">💬</span>
+                  <span>Zalo · 0355417718</span>
+                </a>
+                <a href="https://web.facebook.com/Nguyen.Hvng" target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105"
+                  style={{ background: 'rgba(24,119,242,0.12)', color: '#1877f2' }}>
+                  <span className="text-base">📘</span>
+                  <span>Facebook</span>
+                </a>
+                <button
+                  onClick={() => { navigator.clipboard.writeText('.yennhimylove_'); }}
+                  className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-medium transition-all hover:scale-105 w-full text-left"
+                  style={{ background: 'rgba(88,101,242,0.12)', color: '#5865f2' }}>
+                  <span className="text-base">🎮</span>
+                  <span>.yennhimylove_</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Toggle button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowContact(v => !v)}
+          className="w-12 h-12 rounded-full flex items-center justify-center text-xl shadow-lg"
+          style={{ background: 'linear-gradient(135deg,#7c6af7,#5b8af5)', boxShadow: '0 4px 20px rgba(124,106,247,0.5)' }}
         >
-          <div className="text-center mb-4">
-            <p className="text-sm font-bold mb-1" style={{ color: 'var(--text-1)' }}>
-              💬 Need Help or Support?
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-3)' }}>
-              Get in touch with us through any platform below
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {/* Email */}
-            <a
-              href="mailto:honguyenhung2010@gmail.com"
-              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
-              style={{ 
-                background: 'linear-gradient(135deg, #ea4335, #d33b2c)', 
-                color: 'white',
-                textDecoration: 'none'
-              }}
-            >
-              <span className="text-lg">📧</span>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold">Email</div>
-                <div className="text-[10px] opacity-90 truncate">Gmail</div>
-              </div>
-            </a>
-
-            {/* Zalo */}
-            <a
-              href="https://zalo.me/0355417718"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
-              style={{ 
-                background: 'linear-gradient(135deg, #0068ff, #0052cc)', 
-                color: 'white',
-                textDecoration: 'none'
-              }}
-            >
-              <span className="text-lg">💬</span>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold">Zalo</div>
-                <div className="text-[10px] opacity-90">0355417718</div>
-              </div>
-            </a>
-
-            {/* Facebook */}
-            <a
-              href="https://web.facebook.com/Nguyen.Hvng"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
-              style={{ 
-                background: 'linear-gradient(135deg, #1877f2, #166fe5)', 
-                color: 'white',
-                textDecoration: 'none'
-              }}
-            >
-              <span className="text-lg">📘</span>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold">Facebook</div>
-                <div className="text-[10px] opacity-90 truncate">Nguyen.Hvng</div>
-              </div>
-            </a>
-
-            {/* Discord */}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                navigator.clipboard.writeText('.yennhimylove_');
-                alert('Discord username copied to clipboard!');
-              }}
-              className="flex items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform cursor-pointer"
-              style={{ 
-                background: 'linear-gradient(135deg, #5865f2, #4752c4)', 
-                color: 'white',
-                textDecoration: 'none'
-              }}
-            >
-              <span className="text-lg">🎮</span>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold">Discord</div>
-                <div className="text-[10px] opacity-90 truncate">.yennhimylove_</div>
-              </div>
-            </a>
-          </div>
-
-          {/* Community Chat */}
-          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-            <button
-              onClick={() => navigate('/global')}
-              className="w-full flex items-center justify-center gap-2 p-3 rounded-xl transition-all hover:scale-105 transform"
-              style={{ 
-                background: 'var(--accent)',
-                color: 'white'
-              }}
-            >
-              <span className="text-lg">🌐</span>
-              <div>
-                <div className="text-sm font-semibold">Join Community Chat</div>
-                <div className="text-xs opacity-90">Ask questions & get help from other users</div>
-              </div>
-            </button>
-          </div>
-
-          <p className="text-center text-[10px] mt-3 opacity-60" style={{ color: 'var(--text-3)' }}>
-            ⚡ Fast response • 🇻🇳 Vietnamese & English support
-          </p>
-        </motion.div>
+          {showContact ? '✕' : '💬'}
+        </motion.button>
       </div>
     </div>
   );
