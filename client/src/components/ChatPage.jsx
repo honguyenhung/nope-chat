@@ -16,6 +16,7 @@ import EmojiPicker from './EmojiPicker.jsx';
 import ImageUpload from './ImageUpload.jsx';
 import ImagePreview from './ImagePreview.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import ThemeSelector from './ThemeSelector.jsx';
 import SecurityBadge from './SecurityBadge.jsx';
 
 export default function ChatPage() {
@@ -55,7 +56,7 @@ export default function ChatPage() {
   }, [joinError]);
   const { notify }      = useNotifications();
   const { add: fav }    = useFavorites();
-  const { theme, toggle: toggleTheme } = useThemeContext();
+  const { theme, toggle: toggleTheme, setThemeById } = useThemeContext();
 
   useEffect(() => { if (!isGlobal) fav(effectiveRoom); }, [effectiveRoom]); // eslint-disable-line
 
@@ -235,7 +236,7 @@ export default function ChatPage() {
             style={{ background: 'var(--sidebar-bg)', borderRight: '1px solid var(--border)', backdropFilter: 'blur(24px)' }}
           >
             <Sidebar isGlobal={isGlobal} room={roomLabel} roomId={effectiveRoom} users={users} identity={identity}
-              navigate={navigate} theme={theme} toggleTheme={toggleTheme} onlineCount={onlineCount} securityCode={securityCode} />
+              navigate={navigate} theme={theme} setThemeById={setThemeById} onlineCount={onlineCount} securityCode={securityCode} />
           </motion.aside>
         )}
       </AnimatePresence>
@@ -244,7 +245,7 @@ export default function ChatPage() {
       <aside className="hidden md:flex w-72 flex-col shrink-0 relative z-10"
         style={{ background: 'var(--sidebar-bg)', borderRight: '1px solid var(--border)', backdropFilter: 'blur(24px)' }}>
         <Sidebar isGlobal={isGlobal} room={roomLabel} roomId={effectiveRoom} users={users} identity={identity}
-          navigate={navigate} theme={theme} toggleTheme={toggleTheme} onlineCount={onlineCount} securityCode={securityCode} />
+          navigate={navigate} theme={theme} setThemeById={setThemeById} onlineCount={onlineCount} securityCode={securityCode} />
       </aside>
 
       {/* ── Main ── */}
@@ -287,7 +288,7 @@ export default function ChatPage() {
               </span>
             </div>
             <SecurityBadge roomId={effectiveRoom} />
-            <div className="hidden md:block"><ThemeToggle theme={theme} onToggle={toggleTheme} /></div>
+            <div className="hidden md:block"><ThemeSelector theme={theme} onSelect={setThemeById} /></div>
           </div>
         </header>
 
@@ -409,7 +410,7 @@ export default function ChatPage() {
   );
 }
 
-function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, toggleTheme, onlineCount, securityCode }) {
+function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, setThemeById, onlineCount, securityCode }) {
   return (
     <>
       {/* Header */}
@@ -422,7 +423,7 @@ function Sidebar({ isGlobal, room, roomId, users, identity, navigate, theme, tog
             </svg>
             Home
           </button>
-          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+          <ThemeSelector theme={theme} onSelect={setThemeById} />
         </div>
 
         {/* Room badge */}

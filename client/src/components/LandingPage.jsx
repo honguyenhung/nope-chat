@@ -5,6 +5,7 @@ import { useSocket } from '../hooks/useSocket.jsx';
 import { useFavorites } from '../hooks/useFavorites.js';
 import { useThemeContext } from '../App.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import ThemeSelector from './ThemeSelector.jsx';
 
 function slugify(s) {
   return s.trim().replace(/[^a-zA-Z0-9_-]/g, '-').replace(/-+/g, '-').slice(0, 64);
@@ -38,7 +39,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const { socket, identity, connected, nickname, applyNickname } = useSocket();
   const { favorites, toggle } = useFavorites();
-  const { theme, toggle: toggleTheme } = useThemeContext();
+  const { theme, toggle: toggleTheme, setThemeById } = useThemeContext();
 
   const [nickInput, setNickInput] = useState(nickname);
   const [nickSaved, setNickSaved] = useState(!!nickname);
@@ -79,12 +80,9 @@ export default function LandingPage() {
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
-      {/* Theme toggle */}
-      <div className="fixed top-5 right-5 z-20 flex items-center gap-2">
-        <span className="text-xs font-medium" style={{ color: 'var(--text-3)' }}>
-          {theme === 'dark' ? '🌙' : '☀️'}
-        </span>
-        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      {/* Theme selector */}
+      <div className="fixed top-5 right-5 z-20">
+        <ThemeSelector theme={theme} onSelect={setThemeById} />
       </div>
 
       {/* Content */}

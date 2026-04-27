@@ -7,14 +7,14 @@ import LandingPage from './components/LandingPage.jsx';
 import ChatPage from './components/ChatPage.jsx';
 import FullAdmin from './components/FullAdmin.jsx';
 
-export const ThemeContext = createContext({ theme: 'dark', toggle: () => {} });
+export const ThemeContext = createContext({ theme: 'dark', toggle: () => {}, setThemeById: () => {} });
 export const useThemeContext = () => useContext(ThemeContext);
 
 export default function App() {
-  const { theme, toggle } = useTheme();
+  const { theme, toggle, setThemeById } = useTheme();
 
   return (
-    <ThemeContext.Provider value={{ theme, toggle }}>
+    <ThemeContext.Provider value={{ theme, toggle, setThemeById }}>
       <CryptoProvider>
         <SocketProvider>
           <Routes>

@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react';
 
-// Persists theme in localStorage, defaults to system preference
+export const THEMES = [
+  { id: 'dark',    label: 'Dark',     icon: '🌙' },
+  { id: 'light',   label: 'Light',    icon: '☀️' },
+  { id: 'soft',    label: 'Soft',     icon: '🌸' },
+  { id: 'vibrant', label: 'Vibrant',  icon: '🎨' },
+  { id: 'premium', label: 'Premium',  icon: '💎' },
+];
+
 export function useTheme() {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('anon_theme');
-    if (saved) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute('data-theme', theme);
-    localStorage.setItem('anon_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  // toggle chỉ dùng để switch dark/light (giữ backward compat)
+  function toggle() {
+    setTheme(t => t === 'dark' ? 'light' : 'dark');
+  }
 
-  return { theme, toggle };
+  function setThemeById(id) {
+    setTheme(id);
+  }
+
+  return { theme, toggle, setThemeById };
 }
