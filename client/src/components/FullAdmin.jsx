@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ThemeSelector from './ThemeSelector.jsx';
 import { useThemeContext } from '../App.jsx';
+import { THEMES } from '../hooks/useTheme.js';
 
 export default function FullAdmin() {
   const themeContext = useThemeContext();
@@ -334,7 +335,8 @@ export default function FullAdmin() {
     { id: 'users', label: 'Users', icon: '👥' },
     { id: 'security', label: 'Security', icon: '🛡️' },
     { id: 'messages', label: 'Messages', icon: '💬' },
-    { id: 'rooms', label: 'Rooms', icon: '🏠' }
+    { id: 'rooms', label: 'Rooms', icon: '🏠' },
+    { id: 'themes', label: 'Themes', icon: '🎨' }
   ];
 
   if (!isLoggedIn) {
@@ -768,7 +770,149 @@ export default function FullAdmin() {
               </div>
             </motion.div>
           )}
+          {activeTab === 'themes' && (
+            <motion.div
+              key="themes"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <ThemesPanel currentTheme={theme} onSelectTheme={setThemeById} />
+            </motion.div>
+          )}
         </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+function ThemesPanel({ currentTheme, onSelectTheme }) {
+  const [hoveredId, setHoveredId] = useState(null);
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-bold" style={{ color: 'var(--text-1)' }}>🎨 Quản lý Themes</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-3)' }}>Chọn theme video nền cho toàn bộ ứng dụng</p>
+        </div>
+        <div className="px-3 py-1.5 rounded-xl text-sm font-semibold"
+          style={{ background: 'var(--accent-glow)', color: 'var(--accent)', border: '1px solid var(--accent)' }}>
+          Đang dùng: {THEMES.find(t => t.id === currentTheme)?.icon} {THEMES.find(t => t.id === currentTheme)?.label || 'Custom'}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {THEMES.map((t) => {
+          const isActive = currentTheme === t.id;
+          const isHovered = hoveredId === t.id;
+          return (
+            <motion.div
+              key={t.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative overflow-hidden rounded-2xl cursor-pointer"
+              style={{
+                border: isActive
+                  ? '2.5px solid var(--accent)'
+                  : '2px solid var(--border)',
+                boxShadow: isActive ? '0 0 24px var(--accent-glow)' : 'none',
+                background: 'var(--panel)',
+                transition: 'box-shadow 0.2s, border-color 0.2s',
+              }}
+              onMouseEnter={() => setHoveredId(t.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              onClick={() => onSelectTheme(t.id)}
+            >
+              {/* Preview area */}
+              <div className="relative w-full" style={{ height: 160, background: '#0a0a0f', overflow: 'hidden' }}>
+                {t.video ? (
+                  <video
+                    key={t.id}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                    style={{
+                      filter: 'brightness(1.3) contrast(1.1) saturate(1.1)',
+                      transition: 'filter 0.3s',
+                    }}
+                  >
+                    <source src={t.video} />
+                  </video>
+                ) : t.bg ? (
+                  <img
+                    src={t.bg}
+                    alt={t.label}
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'brightness(1.3) contrast(1.1)' }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-5xl"
+                    style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e)' }}>
+                    {t.icon}
+                  </div>
+                )}
+
+                {/* Overlay gradient */}
+                <div className="absolute inset-0" style={{
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%)'
+                }} />
+
+                {/* Active badge */}
+                {isActive && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+                    style={{ background: 'var(--accent)', color: '#fff', boxShadow: '0 2px 10px var(--accent-glow)' }}>
+                    <span>✓</span> Đang dùng
+                  </div>
+                )}
+
+                {/* Video badge */}
+                {t.video && (
+                  <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                    style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }}>
+                    🎬 Video
+                  </div>
+                )}
+              </div>
+
+              {/* Info row */}
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{t.icon}</span>
+                  <span className="font-semibold text-sm" style={{ color: 'var(--text-1)' }}>{t.label}</span>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={(e) => { e.stopPropagation(); onSelectTheme(t.id); }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                  style={{
+                    background: isActive ? 'var(--accent)' : 'var(--panel-hover)',
+                    color: isActive ? '#fff' : 'var(--text-2)',
+                    border: isActive ? 'none' : '1px solid var(--border)',
+                  }}
+                >
+                  {isActive ? '✓ Đang dùng' : 'Áp dụng'}
+                </motion.button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Info box */}
+      <div className="mt-6 p-4 rounded-2xl flex items-start gap-3"
+        style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}>
+        <span className="text-lg shrink-0">💡</span>
+        <div>
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>Về tính năng Themes</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-3)' }}>
+            Theme được lưu trong localStorage và áp dụng cho toàn bộ app. Video nền chạy tự động với hiệu ứng loop.
+            Người dùng cũng có thể tự chọn theme riêng từ chat page.
+          </p>
+        </div>
       </div>
     </div>
   );
