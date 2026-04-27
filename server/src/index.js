@@ -7,9 +7,13 @@ import { rateLimiter } from './middleware/rateLimiter.js';
 import { registerSocketHandlers } from './sockets/index.js';
 import { apiRouter } from './routes/api.js';
 import { adminRouter } from './routes/admin.js';
+import { connectDatabase } from './config/database.js';
 
 const isProd = process.env.NODE_ENV === 'production';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+
+// Connect to database
+await connectDatabase();
 
 // Validate critical environment variables
 if (isProd) {
