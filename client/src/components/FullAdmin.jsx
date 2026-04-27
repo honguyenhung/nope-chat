@@ -418,6 +418,14 @@ export default function FullAdmin() {
           </div>
           
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all hover:scale-105"
+              style={{ background: 'var(--panel-hover)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
+            >
+              <span>🏠</span>
+              <span className="hidden sm:inline">Trang chính</span>
+            </button>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border)' }}>
               <span className="w-2 h-2 rounded-full bg-green-500" />

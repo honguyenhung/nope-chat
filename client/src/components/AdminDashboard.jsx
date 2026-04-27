@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import VideoBackground from './VideoBackground.jsx';
 import { useThemeContext } from '../App.jsx';
 
 export default function AdminDashboard({ token, onLogout }) {
   const { theme } = useThemeContext();
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [banIP, setBanIP] = useState('');
@@ -147,6 +149,14 @@ export default function AdminDashboard({ token, onLogout }) {
           </div>
           
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-medium transition-all hover:scale-105"
+              style={{ background: 'var(--panel-hover)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
+            >
+              <span>🏠</span>
+              <span className="hidden sm:inline">Trang chính</span>
+            </button>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
               style={{ background: 'var(--input-bg)', border: '1px solid var(--border)' }}>
               <span className="w-2 h-2 rounded-full bg-green-500" />
