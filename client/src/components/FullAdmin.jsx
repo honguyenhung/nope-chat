@@ -344,6 +344,25 @@ export default function FullAdmin() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 admin-panel relative" style={{ background: 'var(--bg)' }}>
         <VideoBackground theme={theme} />
+        
+        {/* Back to Home Button */}
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          onClick={() => navigate('/')}
+          className="fixed top-6 left-6 z-30 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all hover:scale-105"
+          style={{ 
+            background: 'var(--glass)', 
+            border: '1px solid var(--glass-border)', 
+            color: 'var(--text-2)',
+            backdropFilter: 'blur(12px)'
+          }}
+        >
+          <span>←</span>
+          <span className="hidden sm:inline">Quay lại</span>
+        </motion.button>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
