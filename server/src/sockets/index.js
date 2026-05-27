@@ -139,11 +139,11 @@ export function registerSocketHandlers(io) {
     });
 
     // --- Send message ---
-    socket.on('send_message', ({ roomId, encryptedContent, iv, recipientId, encryptedImage, imageIv, encryptedFile, fileIv, fileMetadata }) => {
+    socket.on('send_message', ({ roomId, encryptedContent, iv, sessionKey, recipientId, encryptedImage, imageIv, imageSessionKey, encryptedFile, fileIv, fileSessionKey, fileMetadata }) => {
       incrementMessages(); // Monitor message rate
       
       // NEW: Strict payload validation
-      const payloadSize = JSON.stringify({ encryptedContent, iv, encryptedImage, imageIv, encryptedFile, fileIv }).length;
+      const payloadSize = JSON.stringify({ encryptedContent, iv, sessionKey, encryptedImage, imageIv, imageSessionKey, encryptedFile, fileIv, fileSessionKey }).length;
       if (payloadSize > 20_000_000) { // 20MB max total payload
         recordViolation(ip, 'payload_too_large');
         socket.emit('error', { message: 'Payload too large.' });
@@ -179,6 +179,10 @@ export function registerSocketHandlers(io) {
         socket.emit('error', { message: 'Invalid message format.' });
         return;
       }
+      if (sessionKey && !b64Regex.test(sessionKey)) {
+        socket.emit('error', { message: 'Invalid session key.' });
+        return;
+      }
 
       // Validate encrypted image (base64 of 2MB image + AES overhead ≈ 3MB base64)
       if (encryptedImage) {
@@ -188,6 +192,10 @@ export function registerSocketHandlers(io) {
         }
         if (!imageIv || !b64Regex.test(imageIv)) {
           socket.emit('error', { message: 'Invalid image IV.' });
+          return;
+        }
+        if (imageSessionKey && !b64Regex.test(imageSessionKey)) {
+          socket.emit('error', { message: 'Invalid image session key.' });
           return;
         }
       }
@@ -202,6 +210,10 @@ export function registerSocketHandlers(io) {
           socket.emit('error', { message: 'Invalid file IV.' });
           return;
         }
+        if (fileSessionKey && !b64Regex.test(fileSessionKey)) {
+          socket.emit('error', { message: 'Invalid file session key.' });
+          return;
+        }
       }
 
       if (!encryptedContent && !encryptedImage && !encryptedFile) return;
@@ -213,10 +225,13 @@ export function registerSocketHandlers(io) {
         username:         socket.data.username,
         encryptedContent, // encrypted text — server cannot read
         iv,
+        sessionKey:       sessionKey || null,
         encryptedImage:   encryptedImage || null, // encrypted image — server cannot read
         imageIv:          imageIv || null,
+        imageSessionKey:  imageSessionKey || null,
         encryptedFile:    encryptedFile || null, // encrypted file — server cannot read
         fileIv:           fileIv || null,
+        fileSessionKey:   fileSessionKey || null,
         fileMetadata:     fileMetadata || null, // file name, size, type (not encrypted)
         recipientId,
         timestamp:        Date.now(),

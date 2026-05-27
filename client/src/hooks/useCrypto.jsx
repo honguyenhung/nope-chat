@@ -100,11 +100,11 @@ export function CryptoProvider({ children }) {
   }
 
   /** Returns plaintext string or null on failure */
-  async function decrypt(ciphertext, iv, ctx) {
+  async function decrypt(ciphertext, iv, ctx, sessionKey) {
     if (!iv) return null;
     const key = await resolveKey(ctx);
     if (!key) return null;
-    return decryptMessage(key, ciphertext, iv);
+    return decryptMessage(key, ciphertext, iv, sessionKey);
   }
 
   // ── Encrypt / Decrypt images ─────────────────────────────
@@ -123,11 +123,11 @@ export function CryptoProvider({ children }) {
    * Decrypt an encrypted image back to a data-URL.
    * Returns data-URL string or null on failure.
    */
-  async function decryptImg(ciphertext, iv, ctx) {
+  async function decryptImg(ciphertext, iv, ctx, sessionKey) {
     if (!iv) return null;
     const key = await resolveKey(ctx);
     if (!key) return null;
-    return decryptImage(key, ciphertext, iv);
+    return decryptImage(key, ciphertext, iv, sessionKey);
   }
 
   // ── Security fingerprint ─────────────────────────────────

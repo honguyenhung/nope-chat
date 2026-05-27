@@ -163,7 +163,7 @@ export function useChat(roomId, password = null) {
     let text = null;
     if (msg.encryptedContent) {
       try {
-        text = await decrypt(msg.encryptedContent, msg.iv, ctx);
+        text = await decrypt(msg.encryptedContent, msg.iv, ctx, msg.sessionKey);
       } catch (err) {
         console.warn('Failed to decrypt message:', err);
         text = '🔒 Decryption failed';
@@ -174,7 +174,7 @@ export function useChat(roomId, password = null) {
     let imageData = null;
     if (msg.encryptedImage) {
       try {
-        imageData = await decryptImg(msg.encryptedImage, msg.imageIv, ctx);
+        imageData = await decryptImg(msg.encryptedImage, msg.imageIv, ctx, msg.imageSessionKey);
       } catch (err) {
         console.warn('Failed to decrypt image:', err);
         imageData = null; // Show no image rather than broken image
@@ -188,7 +188,7 @@ export function useChat(roomId, password = null) {
     let fileData = null;
     if (msg.encryptedFile) {
       try {
-        const decryptedData = await decryptImg(msg.encryptedFile, msg.fileIv, ctx);
+        const decryptedData = await decryptImg(msg.encryptedFile, msg.fileIv, ctx, msg.fileSessionKey);
         fileData = {
           data: decryptedData,
           name: msg.fileMetadata?.name || 'file',
@@ -215,30 +215,33 @@ export function useChat(roomId, password = null) {
       const ctx   = { roomId };
 
       // Encrypt text
-      let ciphertext = '', iv = '';
+      let ciphertext = '', iv = '', sessionKey = null;
       if (clean) {
         const enc = await encrypt(clean, ctx);
         if (!enc) return; // key not ready
         ciphertext = enc.ciphertext;
         iv         = enc.iv;
+        sessionKey = enc.sessionKey;
       }
 
       // Encrypt image — never send raw base64 to server
-      let encryptedImage = null, imageIv = null;
+      let encryptedImage = null, imageIv = null, imageSessionKey = null;
       if (rawImageDataUrl) {
         const encImg = await encryptImg(rawImageDataUrl, ctx);
         if (!encImg) return; // key not ready
         encryptedImage = encImg.ciphertext;
         imageIv        = encImg.iv;
+        imageSessionKey = encImg.sessionKey;
       }
 
       // Encrypt file
-      let encryptedFile = null, fileIv = null, fileMetadata = null;
+      let encryptedFile = null, fileIv = null, fileMetadata = null, fileSessionKey = null;
       if (fileData) {
         const encFile = await encryptImg(fileData.data, ctx); // Reuse image encryption for files
         if (!encFile) return;
         encryptedFile = encFile.ciphertext;
         fileIv = encFile.iv;
+        fileSessionKey = encFile.sessionKey;
         fileMetadata = { name: fileData.name, size: fileData.size, type: fileData.type };
       }
 
@@ -265,10 +268,13 @@ export function useChat(roomId, password = null) {
         roomId,
         encryptedContent: ciphertext,
         iv,
+        sessionKey,       // New: layer 3 session key
         encryptedImage,   // encrypted image blob
         imageIv,          // IV for image decryption
+        imageSessionKey,
         encryptedFile,    // encrypted file blob
         fileIv,           // IV for file decryption
+        fileSessionKey,
         fileMetadata,     // file name, size, type (not encrypted - for display)
         // imageData is intentionally NOT sent — server never sees raw images
       });
